@@ -97,14 +97,13 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 <div class="card"><h2>Resultado de la simulación</h2>
 <div class="results">
 <div class="metric"><div class="k">Tasa aplicada</div><div class="v" id="rate">—</div></div>
-<div class="metric"><div class="k">Factor cuota</div><div class="v" id="factor">—</div></div>
 <div class="metric"><div class="k">Cuota nueva</div><div class="v" id="cuota">S/ 0.00</div></div>
 <div class="metric"><div class="k">Ingreso neto promedio</div><div class="v" id="neto">S/ 0.00</div></div>
-<div class="metric"><div class="k">Cuota máxima RCI</div><div class="v" id="qmax">S/ 0.00</div></div>
+<div class="metric"><div class="k">Saco de liquidez</div><div class="v" id="qmax">S/ 0.00</div></div>
 <div class="metric"><div class="k">Endeudamiento final</div><div class="v" id="end">0.00%</div></div>
 </div>
 <div id="status" class="status neutral">Selecciona convenio, cargo y condición</div><div id="alerts"></div>
-<div class="info"><b>Capacidad RCI</b><br>Ingreso neto × RCI − provisión = <strong></strong><span id="rciDetail"></span></div><div class="info suggest"><b>Monto sugerido máximo</b><div class="amount" id="sug">S/ 0.00</div><small>Capacidad disponible limitada por RCI y endeudamiento global.</small></div>
+esultado calculado automáticamente según RCI, facultativos y provisión del convenio.</small></div>
 </div>
 
 <div class="card"><h2>Parámetros del convenio</h2><div class="info" style="margin-bottom:10px"><b>Provisión automática:</b> se obtiene de la fila seleccionada del convenio y se muestra en soles. No se ingresa manualmente. Se descuenta después de aplicar el RCI.</div><div id="params" class="paramgrid"></div><div id="anti" class="info" style="margin-top:9px">Selecciona un perfil.</div></div>
@@ -150,8 +149,46 @@ function parseCSV(txt){
 function current(){return DATA.find(r=>r.Convenio===$("conv").value&&r.Cargo===$("cargo").value&&r["Condicion especial"]===$("cond").value)||null}
 function parsePct(v){if(v===""||v==null)return 0;if(typeof v==="number")return v>1?v/100:v;let m=String(v).replace(",",".").match(/-?\d+(?:\.\d+)?/);if(!m)return 0;let n=+m[0];return n>1?n/100:n}
 function parseMoney(v){if(v===""||v==null)return 0;if(typeof v==="number")return v;let s=String(v).replace(/S\.?\/?\s*/gi,"").replace(/,/g,".");let m=s.match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):0}
-function allowed(rule,b){let s=String(rule||"").toUpperCase();if(!b||!s)return true;let ranges=[...s.matchAll(/(NB|G\d)\s*-\s*(NB|G\d|OTROS)/g)];for(let m of ranges){if(b==="NB"&&m[1]==="NB")return true;if(b.startsWith("G")&&m[1].startsWith("G")){let x=+b.slice(1),a=+m[1].slice(1);if(m[2]==="OTROS"&&x>=a)return true;if(m[2].startsWith("G")&&x>=a&&x<=+m[2].slice(1))return true}}return s.includes(b)}
-function rateFrom(text,b){let s=String(text||"").toUpperCase(),m;let re=/(NB|G\d)\s*-\s*(NB|G\d|OTROS)\s*:\s*([0-9]+(?:[.,][0-9]+)?)\s*%/g;while(m=re.exec(s)){let a=m[1],z=m[2],v=parseFloat(m[3].replace(",","."))/100;if(b==="NB"&&a==="NB")return v;if(b.startsWith("G")&&a.startsWith("G")){let x=+b.slice(1),aa=+a.slice(1);if(z==="OTROS"&&x>=aa)return v;if(z.startsWith("G")&&x>=aa&&x<=+z.slice(1))return v}}return 0}
+function bureauRank(b){
+ const s=String(b||"").toUpperCase().trim();
+ if(s==="NB") return 0;
+ const m=s.match(/^G([1-8])$/); return m?Number(m[1]):null;
+}
+function ruleRanges(text){
+ const s=String(text||"").toUpperCase();
+ const ranges=[];
+ const re=/(NB|G\d)\s*-\s*(NB|G\d|OTROS)/g;
+ let m;
+ while((m=re.exec(s))){
+   ranges.push([m[1],m[2]]);
+ }
+ return ranges;
+}
+function rangeIncludes(start,end,b){
+ const br=bureauRank(b); if(br===null)return false;
+ const a=bureauRank(start);
+ if(a===null)return false;
+ if(end==="OTROS") return br>=a && br>0;
+ const z=bureauRank(end);
+ if(z===null)return false;
+ if(a===0) return br>=0 && br<=z;
+ return br>=a && br<=z;
+}
+function allowed(rule,b){
+ if(!b||!String(rule||"").trim())return true;
+ const ranges=ruleRanges(rule);
+ if(ranges.length) return ranges.some(([a,z])=>rangeIncludes(a,z,b));
+ return String(rule).toUpperCase().includes(String(b).toUpperCase());
+}
+function rateFrom(text,b){
+ const s=String(text||"").toUpperCase();
+ const re=/(NB|G\d)\s*-\s*(NB|G\d|OTROS)\s*:\s*([0-9]+(?:[.,][0-9]+)?)\s*%/g;
+ let m;
+ while((m=re.exec(s))){
+   if(rangeIncludes(m[1],m[2],b)) return parseFloat(m[3].replace(",","."))/100;
+ }
+ return 0;
+}
 const insuranceRate={"Sin devolución":0.05511,"Con devolución":0.05823,"PNP-Sin devolución":0.06503,"PNP-Con devolución":0.06871,"Sin seguro":0};
 function monthlyRate(tea){return Math.pow(1+tea,1/12)-1}
 function factor(tea,n){if(!tea||n<=0)return 0;let r=monthlyRate(tea);return r/(1-Math.pow(1+r,-n))}
@@ -160,44 +197,105 @@ function resetResult(){$("status").className="status neutral";$("status").textCo
 function calc(){
  let r=current(); if(!r){resetResult();return}
  let b=$("buro").value, edad=num("edad"), plazo=num("plazo"), monto=num("monto"), seguro=$("seguro").value;
- let tea=rateFrom( seguro==="Sin seguro" ? r["Tasa Sin Seguro"] : r["Tasa Con Seguro"], b);
- let fac=tea?factor(tea,plazo):0, cuota=monto*fac;
- let fi=avg(["f1","f2","f3"]), va=avg(["v1","v2","v3"]), nc=avg(["nc1","nc2","nc3"]), ad=avg(["ad1","ad2","ad3"]);
- let ley=avg(["l1","l2","l3"]), facult=avg(["fa1","fa2","fa3"]);
- let net=Math.max(0,fi+va+nc+ad-ley-facult);
- let rci=parsePct(r["RCI boleta\n(Descuento máximo)"]); let provision=parseMoney(r["Provisión"]); let rciGross=Math.max(0,net*rci); let qmax=Math.max(0,rciGross-provision);
+
+ // Tasa por Buró + seguro.
+ let tea=rateFrom(seguro==="Sin seguro" ? r["Tasa Sin Seguro"] : r["Tasa Con Seguro"], b);
+
+ // Promedios de las 3 boletas.
+ let fi=avg(["f1","f2","f3"]);
+ let va=avg(["v1","v2","v3"]);
+ let nc=avg(["nc1","nc2","nc3"]);
+ let ad=avg(["ad1","ad2","ad3"]);
+ let ley=avg(["l1","l2","l3"]);
+ let facult=avg(["fa1","fa2","fa3"]);
+
+ // % de conversión del ingreso variable definido en Adicional Core.
+ let variablePct=parsePct(r["% Ingreso variable"]);
+ let variableConvertido=va*variablePct;
+
+ // NUEVO SACO DE LIQUIDEZ:
+ // (Ingreso Fijo + Ingreso Variable convertido - Descuento de Ley) × RCI
+ // - Facultativos - Provisión automática
+ let baseRCI=Math.max(0,fi+variableConvertido-ley);
+ let rci=parsePct(r["RCI boleta\n(Descuento máximo)"]);
+ let provision=parseMoney(r["Provisión"]);
+ let sacoLiquidez=Math.max(0,baseRCI*rci-facult-provision);
+
+ // Cuota de la solicitud solamente para comparar contra el saco.
+ let cuota=tea?monto*factor(tea,plazo):0;
+
+ // Endeudamiento global: mantiene ingreso variable convertido.
  let deudas=num("dbcons")+num("dbveh")+num("dbhip")+num("dbtc")+num("dob")+num("lineaU")+num("otros");
  let tcNoUtil=num("lineaN")*0.5/36;
- let globalBase=Math.max(0,fi+va+nc+ad);
+ let globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley);
  let limite=edad>60?parsePct(r["Endeudamiento máximo \n(+ 60 años)"]):parsePct(r["Endeudamiento máximo \n(- 60 años)"]);
  let end=globalBase?(deudas+tcNoUtil+cuota)/globalBase:0;
+
  let maxAge=Number(r["Edad máxima al finalizar el crédito (Años)"])||999;
  let ageEnd=edad+plazo/12, alerts=[];
+
  if(!b)alerts.push("Selecciona el buró para aplicar la tasa correcta.");
  else if(!allowed(r["Buró"],b))alerts.push("El buró "+b+" no está permitido para este perfil ("+(r["Buró"]||"no informado")+")");
  if(!seguro)alerts.push("Selecciona una de las 5 opciones de seguro.");
  if(!tea)alerts.push("No se encontró una tasa para la combinación Buró + seguro seleccionada.");
  if(edad&&plazo&&ageEnd>maxAge)alerts.push("El plazo excede la edad máxima permitida para este convenio.");
- if(monto&&cuota>qmax)alerts.push("La cuota nueva supera la capacidad máxima por RCI.");
+ if(monto&&cuota>sacoLiquidez)alerts.push("La cuota nueva supera el saco de liquidez disponible.");
  if(globalBase&&end>limite)alerts.push("El endeudamiento global supera el límite permitido.");
+
  let availableEnd=Math.max(0,limite*globalBase-deudas-tcNoUtil);
- let maxPay=Math.max(0,Math.min(qmax,availableEnd)), suggested=fac?maxPay/fac:0;
- $("rate").textContent=tea?pct(tea):"—";$("factor").textContent=fac?fac.toFixed(8):"—";$("cuota").textContent=money(cuota);$("neto").textContent=money(net);$("qmax").textContent=money(qmax);$("end").textContent=pct(end);$("sug").textContent=money(suggested);
- ["fp","vp","ncp","adp","lp","fap"].forEach((id,i)=>{let vals=[fi,va,nc,ad,ley,facult];$(id).textContent=money(vals[i])});
- for(let i=1;i<=3;i++)$("n"+i).textContent=money(Math.max(0,num("f"+i)+num("v"+i)+num("nc"+i)+num("ad"+i)-num("l"+i)-num("fa"+i)));
- $("np").textContent=money(net);
+ let maxPay=Math.max(0,Math.min(sacoLiquidez,availableEnd));
+ let suggested=tea&&plazo?maxPay/factor(tea,plazo):0;
+
+ $("rate").textContent=tea?pct(tea):"—";
+ $("cuota").textContent=money(cuota);
+ $("qmax").textContent=money(sacoLiquidez);
+ $("end").textContent=pct(end);
+ $("sug").textContent=money(suggested);
+
+ ["fp","vp","ncp","adp","lp","fap"].forEach((id,i)=>{
+   let vals=[fi,va,nc,ad,ley,facult]; $(id).textContent=money(vals[i])
+ });
+ for(let i=1;i<=3;i++){
+   $("n"+i).textContent=money(Math.max(0,num("f"+i)+num("v"+i)+num("nc"+i)+num("ad"+i)-num("l"+i)-num("fa"+i)))
+ }
+ $("np").textContent=money(Math.max(0,fi+va+nc+ad-ley-facult));
+
  $("params").innerHTML=[
- ["Buró permitido",r["Buró"]||"—"],["Edad máxima",maxAge+" años"],["RCI boleta",pct(rci)],["Capacidad RCI",money(rciGross)],["Provisión automática",money(provision)],
- ["End. -60",pct(parsePct(r["Endeudamiento máximo \n(- 60 años)"]))],["End. +60",pct(parsePct(r["Endeudamiento máximo \n(+ 60 años)"]))],
- ["Tasa con seguro",r["Tasa Con Seguro"]||"—"],["Tasa sin seguro",r["Tasa Sin Seguro"]||"—"],["Tasa aplicada",tea?pct(tea):"—"],
- ["Factor cuota",fac?fac.toFixed(8):"—"],["Seguro desgravamen",pct(insuranceRate[seguro]||0)]
+  ["Buró permitido",r["Buró"]||"—"],
+  ["Edad máxima",maxAge+" años"],
+  ["RCI boleta",pct(rci)],
+  ["Conversión ingreso variable",pct(variablePct)],
+  ["Provisión automática",money(provision)],
+  ["End. -60",pct(parsePct(r["Endeudamiento máximo \n(- 60 años)"]))],
+  ["End. +60",pct(parsePct(r["Endeudamiento máximo \n(+ 60 años)"]))],
+  ["Tasa con seguro",r["Tasa Con Seguro"]||"—"],
+  ["Tasa sin seguro",r["Tasa Sin Seguro"]||"—"],
+  ["Tasa aplicada",tea?pct(tea):"—"],
+  ["Seguro desgravamen",pct(insuranceRate[seguro]||0)]
  ].map(x=>'<div class="param"><b>'+esc(x[0])+'</b><span>'+esc(x[1])+'</span></div>').join("");
+
  $("anti").innerHTML="<b>Antigüedad requerida:</b> "+esc(r["Antiguedad de servidor (Años)"]||"No especificada")+" años";
- $("gen").value=r["Consideraciones generales"]||"";$("esp").value=r["Condiciones Específicas"]||"";
- $("detail").innerHTML="<b>Seguro:</b> "+esc(seguro||"—")+" · <b>Tasa:</b> "+(tea?pct(tea):"—")+"<br><b>Ingreso fijo promedio:</b> "+money(fi)+"<br><b>Ingreso variable promedio:</b> "+money(va)+"<br><b>No constante:</b> "+money(nc)+"<br><b>Adicional endeudamiento:</b> "+money(ad)+"<br><b>Descuento ley:</b> "+money(ley)+"<br><b>Facultativo:</b> "+money(facult)+"<br><b>Ingreso neto:</b> "+money(net)+"<br><b>RCI del convenio:</b> "+pct(rci)+"<br><b>Capacidad antes de provisión:</b> "+money(rciGross)+"<br><b>Provisión automática del convenio:</b> "+money(provision)+"<br><b>Cuota máxima RCI:</b> "+money(rciGross)+" − "+money(provision)+" = "+money(qmax)+"<br><b>Deudas:</b> "+money(deudas)+"<br><b>TC no utilizada:</b> "+money(tcNoUtil)+"<br><b>Edad al término:</b> "+ageEnd.toFixed(2)+" años";
+ $("gen").value=r["Consideraciones generales"]||"";
+ $("esp").value=r["Condiciones Específicas"]||"";
+
+ $("detail").innerHTML=
+  "<b>Ingreso fijo promedio:</b> "+money(fi)+
+  "<br><b>Ingreso variable promedio:</b> "+money(va)+
+  "<br><b>Conversión ingreso variable:</b> "+pct(variablePct)+
+  "<br><b>Ingreso variable convertido:</b> "+money(variableConvertido)+
+  "<br><b>Descuento de ley promedio:</b> "+money(ley)+
+  "<br><b>Facultativos promedio:</b> "+money(facult)+
+  "<br><b>Provisión automática:</b> "+money(provision)+
+  "<br><b>Saco de liquidez disponible:</b> "+money(sacoLiquidez)+
+  "<br><b>Deudas:</b> "+money(deudas)+
+  "<br><b>TC no utilizada:</b> "+money(tcNoUtil)+
+  "<br><b>Edad al término:</b> "+ageEnd.toFixed(2)+" años";
+
  $("alerts").innerHTML=alerts.map(x=>'<div class="alert">⚠ '+esc(x)+'</div>').join("");
- $("status").className="status "+(alerts.length?"bad":"ok");$("status").textContent=alerts.length?"✕ NO CALIFICA":"✓ CALIFICA";
+ $("status").className="status "+(alerts.length?"bad":"ok");
+ $("status").textContent=alerts.length?"✕ NO CALIFICA":"✓ CALIFICA";
 }
+
 function init(){
  try{
    const convenios=uniq(DATA.map(r=>r.Convenio));

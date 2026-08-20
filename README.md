@@ -1,20 +1,32 @@
-# MCA CALCULADORA V13
+# MCA CALCULADORA V15
 
-## Verificación
-La versión pública anterior estaba sirviendo una versión vieja: el encabezado público decía `Base local: cargada`, no el contador de convenios de la V12. Además, la V12 todavía tenía una referencia a un elemento `rciDetail` que no existe y podía detener la simulación al ejecutar `calc()`.
+## Saco de liquidez — lógica corregida
 
-V13:
-- carga 238 convenios / 548 perfiles desde un respaldo interno antes de leer el CSV;
-- inicializa después de `DOMContentLoaded`;
-- el CSV es opcional y solo actualiza la base una vez cargada;
-- elimina la referencia inexistente `rciDetail`;
-- provisión automática desde el perfil;
-- logos originales MCA y BBVA;
-- fondo azul BBVA.
+El ingreso variable NO se toma completo. Primero se aplica el porcentaje `% Ingreso variable` del perfil seleccionado en `Adicional Core`.
 
-Subir exactamente:
-- index.html
-- base_convenios_editable.csv
-- logo-mca.png
-- logo-bbva.png
-- README.md
+1. Promedio Ingreso Fijo.
+2. Promedio Ingreso Variable.
+3. Ingreso Variable Convertido = Ingreso Variable × `% Ingreso variable`.
+4. Base RCI = Ingreso Fijo + Ingreso Variable Convertido − Descuento de Ley.
+5. Base RCI × RCI del convenio.
+6. Se resta el Facultativo promedio.
+7. Se resta la Provisión automática del convenio.
+
+Resultado:
+`Saco de liquidez = (Fijo + Variable×%Conversión − Ley) × RCI − Facultativos − Provisión`
+
+## Buró
+Los rangos se interpretan de forma consecutiva:
+- G1-G3 = G1/G2/G3
+- G4-G6 = G4/G5/G6
+- NB-G6 = NB/G1/G2/G3/G4/G5/G6
+
+La misma lógica se usa para encontrar la tasa.
+
+## Interfaz
+No se muestra:
+- Factor cuota
+- Capacidad RCI
+- Fórmula del cálculo
+
+La provisión es automática.
