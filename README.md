@@ -1,32 +1,10 @@
-# MCA CALCULADORA V15
+# MCA CALCULADORA V16
 
-## Saco de liquidez — lógica corregida
-
-El ingreso variable NO se toma completo. Primero se aplica el porcentaje `% Ingreso variable` del perfil seleccionado en `Adicional Core`.
-
-1. Promedio Ingreso Fijo.
-2. Promedio Ingreso Variable.
-3. Ingreso Variable Convertido = Ingreso Variable × `% Ingreso variable`.
-4. Base RCI = Ingreso Fijo + Ingreso Variable Convertido − Descuento de Ley.
-5. Base RCI × RCI del convenio.
-6. Se resta el Facultativo promedio.
-7. Se resta la Provisión automática del convenio.
-
-Resultado:
-`Saco de liquidez = (Fijo + Variable×%Conversión − Ley) × RCI − Facultativos − Provisión`
-
-## Buró
-Los rangos se interpretan de forma consecutiva:
-- G1-G3 = G1/G2/G3
-- G4-G6 = G4/G5/G6
-- NB-G6 = NB/G1/G2/G3/G4/G5/G6
-
-La misma lógica se usa para encontrar la tasa.
-
-## Interfaz
-No se muestra:
-- Factor cuota
-- Capacidad RCI
-- Fórmula del cálculo
-
-La provisión es automática.
+- Eliminado el campo superior duplicado de Adicional solo endeudamiento.
+- Adicional solo endeudamiento queda únicamente en Datos financieros, debajo de Facultativo.
+- Los campos financieros recalculan en tiempo real al escribir o cambiar.
+- Se admite coma decimal.
+- Los promedios de las 3 boletas se recalculan automáticamente.
+- Se mantiene el saco de liquidez:
+  `(Fijo + Variable × %Conversión − Ley) × RCI − Facultativos − Provisión`.
+- El adicional solo endeudamiento se utiliza para endeudamiento global.

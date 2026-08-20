@@ -62,18 +62,18 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 <div><label>Edad actual</label><input id="edad" type="number" min="18" max="100"></div>
 <div><label>Monto solicitado (S/.)</label><input id="monto" type="number" min="0" step="100"></div>
 <div><label>Plazo (meses)</label><input id="plazo" type="number" min="1" max="120" value="60"></div>
-<div><label>Adicional solo endeudamiento</label><input id="adicional" type="number" min="0" value="0"></div>
+
 </div></div>
 
 <div class="card"><h2>3. Datos financieros (3 últimas boletas)</h2>
-<div class="hint">Los promedios se actualizan automáticamente al escribir en cualquier casillero.</div>
+<div class="hint">Los valores se recalculan en tiempo real. El promedio de las 3 boletas se usa en la simulación. El “Adicional solo endeudamiento” se considera únicamente para el endeudamiento global.</div>
 <div class="scroll"><table>
 <thead><tr><th>Concepto</th><th>Boleta 1</th><th>Boleta 2</th><th>Boleta 3</th><th>Promedio</th></tr></thead>
 <tbody>
 <tr><td>Ingreso fijo</td><td><input id="f1" type="number" value="0" min="0"></td><td><input id="f2" type="number" value="0" min="0"></td><td><input id="f3" type="number" value="0" min="0"></td><td id="fp">S/ 0.00</td></tr>
 <tr><td>Ingreso variable</td><td><input id="v1" type="number" value="0" min="0"></td><td><input id="v2" type="number" value="0" min="0"></td><td><input id="v3" type="number" value="0" min="0"></td><td id="vp">S/ 0.00</td></tr>
 <tr><td>No constante</td><td><input id="nc1" type="number" value="0" min="0"></td><td><input id="nc2" type="number" value="0" min="0"></td><td><input id="nc3" type="number" value="0" min="0"></td><td id="ncp">S/ 0.00</td></tr>
-<tr><td>Adicional solo endeudamiento</td><td><input id="ad1" type="number" value="0" min="0"></td><td><input id="ad2" type="number" value="0" min="0"></td><td><input id="ad3" type="number" value="0" min="0"></td><td id="adp">S/ 0.00</td></tr>
+<tr><td>Adicional solo endeudamiento <span title="Solo se considera para el endeudamiento global">ⓘ</span></td><td><input id="ad1" type="number" value="0" min="0"></td><td><input id="ad2" type="number" value="0" min="0"></td><td><input id="ad3" type="number" value="0" min="0"></td><td id="adp">S/ 0.00</td></tr>
 <tr><td>Descuento de ley</td><td><input id="l1" type="number" value="0" min="0"></td><td><input id="l2" type="number" value="0" min="0"></td><td><input id="l3" type="number" value="0" min="0"></td><td id="lp">S/ 0.00</td></tr>
 <tr><td>Facultativo</td><td><input id="fa1" type="number" value="0" min="0"></td><td><input id="fa2" type="number" value="0" min="0"></td><td><input id="fa3" type="number" value="0" min="0"></td><td id="fap">S/ 0.00</td></tr>
 </tbody>
@@ -118,7 +118,14 @@ let DATA=FALLBACK;
 const $=id=>document.getElementById(id);
 const money=n=>"S/ "+(Number(n)||0).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=n=>((Number(n)||0)*100).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2})+"%";
-const num=id=>Math.max(0,Number($(id).value)||0);
+const num=id=>{
+ let v=$(id)?.value ?? "";
+ v=String(v).trim().replace(/\s/g,"");
+ if(v.includes(",") && v.includes(".")) v=v.replace(/\./g,"").replace(",",".");
+ else if(v.includes(",")) v=v.replace(",",".");
+ const n=Number(v);
+ return Number.isFinite(n)?Math.max(0,n):0;
+};
 const uniq=a=>[...new Set(a.filter(x=>x!==null&&x!==undefined&&String(x).trim()!=="").map(String))].sort((a,b)=>a.localeCompare(b,"es"));
 function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function fill(sel,arr,ph){sel.innerHTML='<option value="">'+ph+'</option>'+arr.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("")}
@@ -192,7 +199,11 @@ function rateFrom(text,b){
 const insuranceRate={"Sin devolución":0.05511,"Con devolución":0.05823,"PNP-Sin devolución":0.06503,"PNP-Con devolución":0.06871,"Sin seguro":0};
 function monthlyRate(tea){return Math.pow(1+tea,1/12)-1}
 function factor(tea,n){if(!tea||n<=0)return 0;let r=monthlyRate(tea);return r/(1-Math.pow(1+r,-n))}
-function avg(ids){let a=ids.map(num).filter(x=>x>0);return a.length?a.reduce((x,y)=>x+y,0)/a.length:0}
+function avg(ids){
+ const filled=ids.filter(id=>String($(id)?.value??"").trim()!=="").map(num);
+ return filled.length?filled.reduce((x,y)=>x+y,0)/filled.length:0;
+}
+function sum(ids){return ids.map(num).reduce((a,b)=>a+b,0)}
 function resetResult(){$("status").className="status neutral";$("status").textContent="Selecciona convenio, cargo y condición";$("alerts").innerHTML="";$("params").innerHTML="";$("gen").value="";$("esp").value="";$("anti").textContent="Selecciona un perfil.";}
 function calc(){
  let r=current(); if(!r){resetResult();return}
@@ -313,7 +324,7 @@ function init(){
 $("conv").addEventListener("change",()=>{let a=DATA.filter(r=>r.Convenio===$("conv").value);fill($("cargo"),uniq(a.map(r=>r.Cargo)),"Seleccione cargo");$("cargo").disabled=false;$("cond").disabled=true;calc()});
 $("cargo").addEventListener("change",()=>{let a=DATA.filter(r=>r.Convenio===$("conv").value&&r.Cargo===$("cargo").value);fill($("cond"),uniq(a.map(r=>r["Condicion especial"])),"Seleccione condición");$("cond").disabled=false;calc()});
 ["cond","buro","seguro"].forEach(id=>$(id).addEventListener("change",calc));
-document.querySelectorAll("input").forEach(x=>x.addEventListener("input",calc));
+document.querySelectorAll("input").forEach(x=>{x.addEventListener("input",calc);x.addEventListener("change",calc);});
 document.addEventListener("DOMContentLoaded",()=>{
   try{
     DATA=FALLBACK;
