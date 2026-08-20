@@ -66,14 +66,14 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </div></div>
 
 <div class="card"><h2>3. Datos financieros (3 últimas boletas)</h2>
-<div class="hint">Los valores se recalculan en tiempo real. El promedio de las 3 boletas se usa en la simulación. El “Adicional solo endeudamiento” se considera únicamente para el endeudamiento global.</div>
+<div class="hint">Los promedios se actualizan automáticamente al escribir en cualquier casillero.</div>
 <div class="scroll"><table>
 <thead><tr><th>Concepto</th><th>Boleta 1</th><th>Boleta 2</th><th>Boleta 3</th><th>Promedio</th></tr></thead>
 <tbody>
 <tr><td>Ingreso fijo</td><td><input id="f1" type="number" value="0" min="0"></td><td><input id="f2" type="number" value="0" min="0"></td><td><input id="f3" type="number" value="0" min="0"></td><td id="fp">S/ 0.00</td></tr>
 <tr><td>Ingreso variable</td><td><input id="v1" type="number" value="0" min="0"></td><td><input id="v2" type="number" value="0" min="0"></td><td><input id="v3" type="number" value="0" min="0"></td><td id="vp">S/ 0.00</td></tr>
 <tr><td>No constante</td><td><input id="nc1" type="number" value="0" min="0"></td><td><input id="nc2" type="number" value="0" min="0"></td><td><input id="nc3" type="number" value="0" min="0"></td><td id="ncp">S/ 0.00</td></tr>
-<tr><td>Adicional solo endeudamiento <span title="Solo se considera para el endeudamiento global">ⓘ</span></td><td><input id="ad1" type="number" value="0" min="0"></td><td><input id="ad2" type="number" value="0" min="0"></td><td><input id="ad3" type="number" value="0" min="0"></td><td id="adp">S/ 0.00</td></tr>
+<tr><td>Adicional solo endeudamiento</td><td><input id="ad1" type="number" value="0" min="0"></td><td><input id="ad2" type="number" value="0" min="0"></td><td><input id="ad3" type="number" value="0" min="0"></td><td id="adp">S/ 0.00</td></tr>
 <tr><td>Descuento de ley</td><td><input id="l1" type="number" value="0" min="0"></td><td><input id="l2" type="number" value="0" min="0"></td><td><input id="l3" type="number" value="0" min="0"></td><td id="lp">S/ 0.00</td></tr>
 <tr><td>Facultativo</td><td><input id="fa1" type="number" value="0" min="0"></td><td><input id="fa2" type="number" value="0" min="0"></td><td><input id="fa3" type="number" value="0" min="0"></td><td id="fap">S/ 0.00</td></tr>
 </tbody>
@@ -119,12 +119,14 @@ const $=id=>document.getElementById(id);
 const money=n=>"S/ "+(Number(n)||0).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
 const pct=n=>((Number(n)||0)*100).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2})+"%";
 const num=id=>{
- let v=$(id)?.value ?? "";
- v=String(v).trim().replace(/\s/g,"");
- if(v.includes(",") && v.includes(".")) v=v.replace(/\./g,"").replace(",",".");
- else if(v.includes(",")) v=v.replace(",",".");
- const n=Number(v);
- return Number.isFinite(n)?Math.max(0,n):0;
+  const el=$(id);
+  if(!el)return 0;
+  let v=String(el.value??"").trim().replace(/\s/g,"");
+  if(!v)return 0;
+  if(v.includes(",")&&v.includes("."))v=v.replace(/\./g,"").replace(",",".");
+  else if(v.includes(","))v=v.replace(",",".");
+  const n=parseFloat(v);
+  return Number.isFinite(n)?Math.max(0,n):0;
 };
 const uniq=a=>[...new Set(a.filter(x=>x!==null&&x!==undefined&&String(x).trim()!=="").map(String))].sort((a,b)=>a.localeCompare(b,"es"));
 function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
@@ -200,113 +202,75 @@ const insuranceRate={"Sin devolución":0.05511,"Con devolución":0.05823,"PNP-Si
 function monthlyRate(tea){return Math.pow(1+tea,1/12)-1}
 function factor(tea,n){if(!tea||n<=0)return 0;let r=monthlyRate(tea);return r/(1-Math.pow(1+r,-n))}
 function avg(ids){
- const filled=ids.filter(id=>String($(id)?.value??"").trim()!=="").map(num);
- return filled.length?filled.reduce((x,y)=>x+y,0)/filled.length:0;
+  const vals=ids.map(id=>num(id));
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
 }
-function sum(ids){return ids.map(num).reduce((a,b)=>a+b,0)}
-function resetResult(){$("status").className="status neutral";$("status").textContent="Selecciona convenio, cargo y condición";$("alerts").innerHTML="";$("params").innerHTML="";$("gen").value="";$("esp").value="";$("anti").textContent="Selecciona un perfil.";}
+function setMoney(id,v){const el=$(id);if(el)el.textContent=money(v);}
+function calculateFinancialTable(){
+  const rows=[
+    ["f1","f2","f3","fp"],["v1","v2","v3","vp"],["nc1","nc2","nc3","ncp"],
+    ["ad1","ad2","ad3","adp"],["l1","l2","l3","lp"],["fa1","fa2","fa3","fap"]
+  ];
+  rows.forEach(([a,b,c,p])=>setMoney(p,(num(a)+num(b)+num(c))/3));
+  for(let i=1;i<=3;i++){
+    const net=num("f"+i)+num("v"+i)+num("nc"+i)+num("ad"+i)-num("l"+i)-num("fa"+i);
+    setMoney("n"+i,Math.max(0,net));
+  }
+  setMoney("np",([1,2,3].reduce((s,i)=>s+num("n"+i),0))/3);
+}
+function resetResult(){
+  $("status").className="status neutral";
+  $("status").textContent="Selecciona convenio, cargo y condición";
+  $("alerts").innerHTML=""; $("params").innerHTML="";
+  $("gen").value=""; $("esp").value="";
+  $("anti").textContent="Selecciona un perfil.";
+  calculateFinancialTable();
+}
 function calc(){
- let r=current(); if(!r){resetResult();return}
- let b=$("buro").value, edad=num("edad"), plazo=num("plazo"), monto=num("monto"), seguro=$("seguro").value;
-
- // Tasa por Buró + seguro.
- let tea=rateFrom(seguro==="Sin seguro" ? r["Tasa Sin Seguro"] : r["Tasa Con Seguro"], b);
-
- // Promedios de las 3 boletas.
- let fi=avg(["f1","f2","f3"]);
- let va=avg(["v1","v2","v3"]);
- let nc=avg(["nc1","nc2","nc3"]);
- let ad=avg(["ad1","ad2","ad3"]);
- let ley=avg(["l1","l2","l3"]);
- let facult=avg(["fa1","fa2","fa3"]);
-
- // % de conversión del ingreso variable definido en Adicional Core.
- let variablePct=parsePct(r["% Ingreso variable"]);
- let variableConvertido=va*variablePct;
-
- // NUEVO SACO DE LIQUIDEZ:
- // (Ingreso Fijo + Ingreso Variable convertido - Descuento de Ley) × RCI
- // - Facultativos - Provisión automática
- let baseRCI=Math.max(0,fi+variableConvertido-ley);
- let rci=parsePct(r["RCI boleta\n(Descuento máximo)"]);
- let provision=parseMoney(r["Provisión"]);
- let sacoLiquidez=Math.max(0,baseRCI*rci-facult-provision);
-
- // Cuota de la solicitud solamente para comparar contra el saco.
- let cuota=tea?monto*factor(tea,plazo):0;
-
- // Endeudamiento global: mantiene ingreso variable convertido.
- let deudas=num("dbcons")+num("dbveh")+num("dbhip")+num("dbtc")+num("dob")+num("lineaU")+num("otros");
- let tcNoUtil=num("lineaN")*0.5/36;
- let globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley);
- let limite=edad>60?parsePct(r["Endeudamiento máximo \n(+ 60 años)"]):parsePct(r["Endeudamiento máximo \n(- 60 años)"]);
- let end=globalBase?(deudas+tcNoUtil+cuota)/globalBase:0;
-
- let maxAge=Number(r["Edad máxima al finalizar el crédito (Años)"])||999;
- let ageEnd=edad+plazo/12, alerts=[];
-
- if(!b)alerts.push("Selecciona el buró para aplicar la tasa correcta.");
- else if(!allowed(r["Buró"],b))alerts.push("El buró "+b+" no está permitido para este perfil ("+(r["Buró"]||"no informado")+")");
- if(!seguro)alerts.push("Selecciona una de las 5 opciones de seguro.");
- if(!tea)alerts.push("No se encontró una tasa para la combinación Buró + seguro seleccionada.");
- if(edad&&plazo&&ageEnd>maxAge)alerts.push("El plazo excede la edad máxima permitida para este convenio.");
- if(monto&&cuota>sacoLiquidez)alerts.push("La cuota nueva supera el saco de liquidez disponible.");
- if(globalBase&&end>limite)alerts.push("El endeudamiento global supera el límite permitido.");
-
- let availableEnd=Math.max(0,limite*globalBase-deudas-tcNoUtil);
- let maxPay=Math.max(0,Math.min(sacoLiquidez,availableEnd));
- let suggested=tea&&plazo?maxPay/factor(tea,plazo):0;
-
- $("rate").textContent=tea?pct(tea):"—";
- $("cuota").textContent=money(cuota);
- $("qmax").textContent=money(sacoLiquidez);
- $("end").textContent=pct(end);
- $("sug").textContent=money(suggested);
-
- ["fp","vp","ncp","adp","lp","fap"].forEach((id,i)=>{
-   let vals=[fi,va,nc,ad,ley,facult]; $(id).textContent=money(vals[i])
- });
- for(let i=1;i<=3;i++){
-   $("n"+i).textContent=money(Math.max(0,num("f"+i)+num("v"+i)+num("nc"+i)+num("ad"+i)-num("l"+i)-num("fa"+i)))
- }
- $("np").textContent=money(Math.max(0,fi+va+nc+ad-ley-facult));
-
- $("params").innerHTML=[
-  ["Buró permitido",r["Buró"]||"—"],
-  ["Edad máxima",maxAge+" años"],
-  ["RCI boleta",pct(rci)],
-  ["Conversión ingreso variable",pct(variablePct)],
-  ["Provisión automática",money(provision)],
-  ["End. -60",pct(parsePct(r["Endeudamiento máximo \n(- 60 años)"]))],
-  ["End. +60",pct(parsePct(r["Endeudamiento máximo \n(+ 60 años)"]))],
-  ["Tasa con seguro",r["Tasa Con Seguro"]||"—"],
-  ["Tasa sin seguro",r["Tasa Sin Seguro"]||"—"],
-  ["Tasa aplicada",tea?pct(tea):"—"],
-  ["Seguro desgravamen",pct(insuranceRate[seguro]||0)]
- ].map(x=>'<div class="param"><b>'+esc(x[0])+'</b><span>'+esc(x[1])+'</span></div>').join("");
-
- $("anti").innerHTML="<b>Antigüedad requerida:</b> "+esc(r["Antiguedad de servidor (Años)"]||"No especificada")+" años";
- $("gen").value=r["Consideraciones generales"]||"";
- $("esp").value=r["Condiciones Específicas"]||"";
-
- $("detail").innerHTML=
-  "<b>Ingreso fijo promedio:</b> "+money(fi)+
-  "<br><b>Ingreso variable promedio:</b> "+money(va)+
-  "<br><b>Conversión ingreso variable:</b> "+pct(variablePct)+
-  "<br><b>Ingreso variable convertido:</b> "+money(variableConvertido)+
-  "<br><b>Descuento de ley promedio:</b> "+money(ley)+
-  "<br><b>Facultativos promedio:</b> "+money(facult)+
-  "<br><b>Provisión automática:</b> "+money(provision)+
-  "<br><b>Saco de liquidez disponible:</b> "+money(sacoLiquidez)+
-  "<br><b>Deudas:</b> "+money(deudas)+
-  "<br><b>TC no utilizada:</b> "+money(tcNoUtil)+
-  "<br><b>Edad al término:</b> "+ageEnd.toFixed(2)+" años";
-
- $("alerts").innerHTML=alerts.map(x=>'<div class="alert">⚠ '+esc(x)+'</div>').join("");
- $("status").className="status "+(alerts.length?"bad":"ok");
- $("status").textContent=alerts.length?"✕ NO CALIFICA":"✓ CALIFICA";
+  calculateFinancialTable();
+  const r=current();
+  if(!r){resetResult();return;}
+  const b=$("buro")?.value||"",edad=num("edad"),plazo=num("plazo"),monto=num("monto"),seguro=$("seguro")?.value||"";
+  const tea=rateFrom(seguro==="Sin seguro"?r["Tasa Sin Seguro"]:r["Tasa Con Seguro"],b);
+  const fi=avg(["f1","f2","f3"]),va=avg(["v1","v2","v3"]),nc=avg(["nc1","nc2","nc3"]),ad=avg(["ad1","ad2","ad3"]),ley=avg(["l1","l2","l3"]),facult=avg(["fa1","fa2","fa3"]);
+  const variablePct=parsePct(r["% Ingreso variable"]);
+  const variableConvertido=va*variablePct;
+  const baseRCI=Math.max(0,fi+variableConvertido-ley);
+  const rci=parsePct(r["RCI boleta\n(Descuento máximo)"]);
+  const provision=parseMoney(r["Provisión"]);
+  const sacoLiquidez=Math.max(0,baseRCI*rci-facult-provision);
+  const cuota=tea?monto*factor(tea,plazo):0;
+  const deudas=num("dbcons")+num("dbveh")+num("dbhip")+num("dbtc")+num("dob")+num("lineaU")+num("otros");
+  const tcNoUtil=num("lineaN")*0.5/36;
+  const globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley);
+  const limite=edad>60?parsePct(r["Endeudamiento máximo \n(+ 60 años)"]):parsePct(r["Endeudamiento máximo \n(- 60 años)"]);
+  const end=globalBase?(deudas+tcNoUtil+cuota)/globalBase:0;
+  const maxAge=Number(r["Edad máxima al finalizar el crédito (Años)"])||999,ageEnd=edad+plazo/12,alerts=[];
+  if(!b)alerts.push("Selecciona el buró para aplicar la tasa correcta.");
+  else if(!allowed(r["Buró"],b))alerts.push("El buró "+b+" no está permitido para este perfil ("+(r["Buró"]||"no informado")+")");
+  if(!seguro)alerts.push("Selecciona una de las 5 opciones de seguro.");
+  if(!tea)alerts.push("No se encontró una tasa para la combinación Buró + seguro seleccionada.");
+  if(edad&&plazo&&ageEnd>maxAge)alerts.push("El plazo excede la edad máxima permitida para este convenio.");
+  if(monto&&cuota>sacoLiquidez)alerts.push("La cuota nueva supera el saco de liquidez disponible.");
+  if(globalBase&&end>limite)alerts.push("El endeudamiento global supera el límite permitido.");
+  const availableEnd=Math.max(0,limite*globalBase-deudas-tcNoUtil);
+  const maxPay=Math.max(0,Math.min(sacoLiquidez,availableEnd));
+  const suggested=tea&&plazo?maxPay/factor(tea,plazo):0;
+  setMoney("cuota",cuota);setMoney("qmax",sacoLiquidez);setMoney("sug",suggested);
+  if($("rate"))$("rate").textContent=tea?pct(tea):"—";if($("end"))$("end").textContent=pct(end);
+  setMoney("fp",fi);setMoney("vp",va);setMoney("ncp",nc);setMoney("adp",ad);setMoney("lp",ley);setMoney("fap",facult);
+  if($("params"))$("params").innerHTML=[
+    ["Buró permitido",r["Buró"]||"—"],["Edad máxima",maxAge+" años"],["RCI boleta",pct(rci)],
+    ["Conversión ingreso variable",pct(variablePct)],["Provisión automática",money(provision)],
+    ["End. -60",pct(parsePct(r["Endeudamiento máximo \n(- 60 años)"]))],["End. +60",pct(parsePct(r["Endeudamiento máximo \n(+ 60 años)"]))],
+    ["Tasa con seguro",r["Tasa Con Seguro"]||"—"],["Tasa sin seguro",r["Tasa Sin Seguro"]||"—"],["Tasa aplicada",tea?pct(tea):"—"]
+  ].map(x=>'<div class="param"><b>'+esc(x[0])+'</b><span>'+esc(x[1])+'</span></div>').join("");
+  $("anti").innerHTML="<b>Antigüedad requerida:</b> "+esc(r["Antiguedad de servidor (Años)"]||"No especificada")+" años";
+  $("gen").value=r["Consideraciones generales"]||"";$("esp").value=r["Condiciones Específicas"]||"";
+  $("detail").innerHTML="<b>Ingreso fijo promedio:</b> "+money(fi)+"<br><b>Ingreso variable promedio:</b> "+money(va)+"<br><b>Conversión ingreso variable:</b> "+pct(variablePct)+"<br><b>Ingreso variable convertido:</b> "+money(variableConvertido)+"<br><b>Descuento de ley promedio:</b> "+money(ley)+"<br><b>Facultativos promedio:</b> "+money(facult)+"<br><b>Provisión automática:</b> "+money(provision)+"<br><b>Saco de liquidez disponible:</b> "+money(sacoLiquidez);
+  $("alerts").innerHTML=alerts.map(x=>'<div class="alert">⚠ '+esc(x)+'</div>').join("");
+  $("status").className="status "+(alerts.length?"bad":"ok");$("status").textContent=alerts.length?"✕ NO CALIFICA":"✓ CALIFICA";
 }
-
 function init(){
  try{
    const convenios=uniq(DATA.map(r=>r.Convenio));
@@ -324,9 +288,14 @@ function init(){
 $("conv").addEventListener("change",()=>{let a=DATA.filter(r=>r.Convenio===$("conv").value);fill($("cargo"),uniq(a.map(r=>r.Cargo)),"Seleccione cargo");$("cargo").disabled=false;$("cond").disabled=true;calc()});
 $("cargo").addEventListener("change",()=>{let a=DATA.filter(r=>r.Convenio===$("conv").value&&r.Cargo===$("cargo").value);fill($("cond"),uniq(a.map(r=>r["Condicion especial"])),"Seleccione condición");$("cond").disabled=false;calc()});
 ["cond","buro","seguro"].forEach(id=>$(id).addEventListener("change",calc));
-document.querySelectorAll("input").forEach(x=>{x.addEventListener("input",calc);x.addEventListener("change",calc);});
+document.querySelectorAll("input").forEach(x=>x.addEventListener("input",calc));
 document.addEventListener("DOMContentLoaded",()=>{
   try{
+    document.querySelectorAll("input").forEach(x=>{
+      x.addEventListener("input",calc);
+      x.addEventListener("change",calc);
+      x.addEventListener("keyup",calc);
+    });
     DATA=FALLBACK;
     init();
     // The CSV is optional: it only updates the internal base after the page is already usable.

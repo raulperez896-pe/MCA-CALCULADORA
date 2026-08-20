@@ -1,10 +1,13 @@
-# MCA CALCULADORA V16
+# MCA CALCULADORA V17
 
-- Eliminado el campo superior duplicado de Adicional solo endeudamiento.
-- Adicional solo endeudamiento queda únicamente en Datos financieros, debajo de Facultativo.
-- Los campos financieros recalculan en tiempo real al escribir o cambiar.
-- Se admite coma decimal.
-- Los promedios de las 3 boletas se recalculan automáticamente.
-- Se mantiene el saco de liquidez:
-  `(Fijo + Variable × %Conversión − Ley) × RCI − Facultativos − Provisión`.
-- El adicional solo endeudamiento se utiliza para endeudamiento global.
+### Tabla de 3 boletas
+- Cada columna calcula su ingreso neto:
+  `Fijo + Variable + No constante + Adicional solo endeudamiento - Ley - Facultativo`.
+- La columna Promedio calcula `(B1+B2+B3)/3` para cada concepto.
+- Se actualiza en tiempo real con input/change/keyup.
+- Los números admiten coma decimal.
+
+### Saco de liquidez
+`(Fijo promedio + Variable promedio × % Conversión − Ley promedio) × RCI − Facultativos promedio − Provisión automática`.
+
+El adicional solo endeudamiento no entra en el saco; solo en endeudamiento global.
