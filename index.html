@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Master Center | Calculadora V2</title>
+<style>
+:root{--n:#062b52;--b:#0b5cab;--bg:#f4f7fb;--line:#dfe6ef;--mut:#667085;--ok:#087443;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Segoe UI,Arial,sans-serif;color:#172033}
+header{background:linear-gradient(135deg,#062b52,#0a579f);color:white;padding:22px}header>div{max-width:1280px;margin:auto}
+h1{margin:0;font-size:25px}.sub{opacity:.82;font-size:13px;margin-top:4px}
+main{max-width:1280px;margin:20px auto;padding:0 16px}.layout{display:grid;grid-template-columns:1.08fr .92fr;gap:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px;margin-bottom:18px;box-shadow:0 4px 16px #102a4309}
+h2{font-size:16px;color:var(--n);margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+label{font-size:12px;font-weight:700;display:block;margin-bottom:5px;color:#344054}
+input,select,textarea{width:100%;border:1px solid #cfd8e3;border-radius:9px;padding:10px;background:#fff}
+input,select{height:42px}textarea{min-height:105px;resize:vertical}
+.results{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{border:1px solid var(--line);padding:12px;border-radius:11px;background:#fbfcfe}
+.k{font-size:10px;color:var(--mut);text-transform:uppercase}.v{font-size:21px;font-weight:800;color:var(--n);margin-top:4px}
+.status{text-align:center;padding:15px;border-radius:12px;font-size:18px;font-weight:800;margin-top:12px}.ok{background:#ecfdf3;color:var(--ok);border:1px solid #abefc6}.bad{background:#fef3f2;color:var(--bad);border:1px solid #fecdca}.neutral{background:#fffaeb;color:#a15c00;border:1px solid #fedf89}
+.alert{margin-top:8px;padding:9px;border-radius:9px;background:#fef3f2;color:#b42318;font-size:13px}.info{background:#f8fafc;border:1px solid var(--line);padding:11px;border-radius:10px;font-size:13px;line-height:1.45}
+.suggest{background:#eff8ff;border-color:#b2ddff}.amount{font-size:25px;font-weight:900;color:var(--b)}
+small{color:var(--mut)}footer{max-width:1280px;margin:auto;padding:0 16px 25px;color:var(--mut);font-size:11px}
+@media(max-width:850px){.layout,.grid,.results{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div><h1>Master Center · Calculadora de Convenios V2</h1><div class="sub">Base editable independiente · actualización automática desde CSV</div></div></header>
+<main><div class="layout">
+<section>
+<div class="card"><h2>1. Perfil del cliente</h2><div class="grid">
+<div><label>Convenio</label><select id="conv"><option>Cargando base…</option></select></div>
+<div><label>Modalidad / Cargo</label><select id="cargo" disabled></select></div>
+<div><label>Condición Especial</label><select id="cond" disabled></select></div>
+<div><label>Buró</label><select id="buro"></select></div>
+<div><label>Edad</label><input id="edad" type="number" min="18"></div>
+<div><label>Monto solicitado S/.</label><input id="monto" type="number" min="0" step="100"></div>
+<div><label>Plazo meses</label><input id="plazo" type="number" min="1" max="120" value="60"></div>
+<div><label>Seguro</label><select id="seguro"><option value="con">Con Seguro</option><option value="sin">Sin Seguro</option></select></div>
+</div></div>
+<div class="card"><h2>2. Datos de boleta</h2><div class="grid">
+<div><label>Ingreso Fijo</label><input id="fijo" type="number" value="0" min="0"></div>
+<div><label>Ingreso Variable</label><input id="variable" type="number" value="0" min="0"></div>
+<div><label>Descuentos de Ley</label><input id="ley" type="number" value="0" min="0"></div>
+<div><label>Descuentos Facultativos</label><input id="fac" type="number" value="0" min="0"></div>
+<div><label>Deudas externas / cuotas actuales</label><input id="deudas" type="number" value="0" min="0"></div>
+</div></div>
+<div class="card"><h2>3. Parámetros del convenio</h2><div id="params" class="results"></div><div id="anti" class="info" style="margin-top:10px">Selecciona un perfil.</div></div>
+</section>
+<section>
+<div class="card"><h2>Resultado en tiempo real</h2><div class="results">
+<div class="metric"><div class="k">Ingreso neto</div><div class="v" id="neto">S/ 0.00</div></div>
+<div class="metric"><div class="k">Tasa aplicada</div><div class="v" id="tasa">—</div></div>
+<div class="metric"><div class="k">Cuota estimada</div><div class="v" id="cuota">S/ 0.00</div></div>
+<div class="metric"><div class="k">Cuota máxima RCI</div><div class="v" id="qmax">S/ 0.00</div></div>
+<div class="metric"><div class="k">% Endeudamiento</div><div class="v" id="end">0.00%</div></div>
+<div class="metric"><div class="k">Límite endeudamiento</div><div class="v" id="endlim">—</div></div>
+</div>
+<div id="status" class="status neutral">Completa los datos</div><div id="alerts"></div>
+<div class="info suggest" style="margin-top:12px"><b>Monto sugerido referencial</b><div id="sugerido" class="amount">S/ 0.00</div><small>Estimado con capacidad de cuota y plazo seleccionados.</small></div>
+</div>
+<div class="card"><h2>Consideraciones generales</h2><textarea id="gen" readonly></textarea><h2 style="margin-top:12px">Condiciones específicas</h2><textarea id="esp" readonly></textarea></div>
+</section></div></main>
+<footer>V2 · La base editable debe conservar los encabezados originales del Excel. Validar las reglas con la fuente bancaria antes de producción.</footer>
+<script>
+let DATA=[], HEAD=[];
+const $=x=>document.getElementById(x), money=n=>"S/ "+(Number(n)||0).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2}), pct=n=>((Number(n)||0)*100).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2})+"%";
+const unique=a=>[...new Set(a.filter(x=>x!=null&&String(x).trim()!=="").map(String))].sort((a,b)=>a.localeCompare(b,"es"));
+function fill(s,a,p){s.innerHTML='<option value="">'+p+'</option>'+a.map(x=>'<option>'+esc(x)+'</option>').join("")}
+function esc(x){return String(x).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function parseCSV(txt){
+ const out=[], lines=txt.replace(/^\uFEFF/,"").split(/\r?\n/); if(!lines.length)return out;
+ const parse=line=>{let a=[],cur="",q=false;for(let i=0;i<line.length;i++){let c=line[i];if(c=='"'){if(q&&line[i+1]=='"'){cur+='"';i++}else q=!q}else if(c==","&&!q){a.push(cur);cur=""}else cur+=c}a.push(cur);return a};
+ HEAD=parse(lines[0]);for(let i=1;i<lines.length;i++){if(!lines[i].trim())continue;let a=parse(lines[i]),o={};HEAD.forEach((h,j)=>o[h]=a[j]??"");out.push(o)}return out
+}
+async function load(){
+ try{
+  const r=await fetch("base_convenios_editable.csv?ts="+Date.now()); if(!r.ok)throw Error();
+  DATA=parseCSV(await r.text()); fill($("conv"),unique(DATA.map(x=>x.Convenio)),"Seleccione un convenio"); $("status").textContent="Base cargada";
+ }catch(e){$("conv").innerHTML='<option>Error cargando base_convenios_editable.csv</option>'}
+}
+function rows(){return DATA.filter(r=>r.Convenio===$("conv").value&&r.Cargo===$("cargo").value&&r["Condicion especial"]===$("cond").value)}
+function cur(){return rows()[0]||null}
+function pp(x){let s=String(x||"").replace(",",".");let m=s.match(/-?\d+(\.\d+)?/);return m?(parseFloat(m[0])>1?parseFloat(m[0])/100:parseFloat(m[0])):0}
+function rate(text,b){let s=String(text||"").toUpperCase();let re=/(G\d|NB)\s*-\s*(G\d|NB|OTROS)\s*:\s*([0-9]+(?:[.,][0-9]+)?)\s*%/g,m;while(m=re.exec(s)){let a=m[1],z=m[2],v=parseFloat(m[3].replace(",","."))/100;if(b==="NB"&&a==="NB")return v;if(a[0]==="G"&&b[0]==="G"){let x=+b.slice(1),aa=+a.slice(1);if(z==="OTROS"&&x>=aa)return v;if(z[0]==="G"&&x>=aa&&x<=+z.slice(1))return v}}return pp(text)}
+function factor(r,n){let q=r/12;return Math.abs(q)<1e-12?1/n:q/(1-Math.pow(1+q,-n))}
+function recalc(){
+ let r=cur();if(!r)return;
+ let edad=+$("edad").value||0,m=+$("monto").value||0,n=+$("plazo").value||0,f=+$("fijo").value||0,v=+$("variable").value||0,l=+$("ley").value||0,fa=+$("fac").value||0,d=+$("deudas").value||0;
+ let net=Math.max(0,f+v-l), rci=pp(r["RCI boleta\n(Descuento máximo)"]), rt=rate($("seguro").value==="con"?r["Tasa Con Seguro"]:r["Tasa Sin Seguro"],$("buro").value), cuota=m*factor(rt,n), qmax=net*rci, lim=edad<=60?pp(r["Endeudamiento máximo \n(- 60 años)"]):pp(r["Endeudamiento máximo \n(+ 60 años)"]), global=f+v, end=global?(d+fa+cuota)/global:0, maxage=+(r["Edad máxima al finalizar el crédito (Años)"]||999), bad=[];
+ $("neto").textContent=money(net);$("tasa").textContent=pct(rt);$("cuota").textContent=money(cuota);$("qmax").textContent=money(qmax);$("end").textContent=pct(end);$("endlim").textContent=pct(lim);
+ $("params").innerHTML=[["Edad máxima",maxage+" años"],["RCI",pct(rci)],["Endeudamiento -60",pct(pp(r["Endeudamiento máximo \n(- 60 años)"]))],["Endeudamiento +60",pct(pp(r["Endeudamiento máximo \n(+ 60 años"]))],["Provisión",pct(pp(r["Provisión"]))],["Cuotas máximas",(r["Cuotas máximas (meses)"]||"—")+" meses"]].map(x=>'<div class="metric"><div class="k">'+esc(x[0])+'</div><div class="v">'+esc(x[1])+'</div></div>').join("");
+ $("anti").innerHTML="<b>Antigüedad requerida:</b> "+esc(r["Antiguedad de servidor (Años)"]||"No especificada")+" años";
+ $("gen").value=r["Consideraciones generales"]||"";$("esp").value=r["Condiciones Específicas"]||"";
+ if(!$("buro").value)bad.push("Selecciona el buró para aplicar la tasa.");if(edad&&n&&edad+n/12>maxage)bad.push("El plazo excede la edad máxima permitida para este convenio.");if(m&&cuota>qmax)bad.push("La cuota supera la capacidad RCI.");if(global&&end>lim)bad.push("El endeudamiento global supera el límite permitido.");
+ let pay=Math.max(0,Math.min(qmax,lim*global-d-fa)), sug=pay/factor(rt,n);$("sugerido").textContent=money(sug);
+ $("alerts").innerHTML=bad.map(x=>'<div class="alert">⚠ '+esc(x)+'</div>').join("");
+ $("status").className="status "+(bad.length?"bad":"ok");$("status").textContent=bad.length?"✕ NO CALIFICA":"✓ CALIFICA";
+}
+$("conv").onchange=()=>{let a=DATA.filter(r=>r.Convenio===$("conv").value);fill($("cargo"),unique(a.map(r=>r.Cargo)),"Seleccione cargo");$("cargo").disabled=false;$("cond").disabled=true;recalc()};
+$("cargo").onchange=()=>{let a=DATA.filter(r=>r.Convenio===$("conv").value&&r.Cargo===$("cargo").value);fill($("cond"),unique(a.map(r=>r["Condicion especial"])),"Seleccione condición");$("cond").disabled=false;recalc()};
+["cond","buro","edad","monto","plazo","seguro","fijo","variable","ley","fac","deudas"].forEach(id=>$(id).addEventListener("input",recalc));
+["cond","buro","seguro"].forEach(id=>$(id).addEventListener("change",recalc));
+fill($("buro"),["G1","G2","G3","G4","G5","G6","G7","G8","NB"],"Seleccione buró");load();
+</script>
+</body></html>
