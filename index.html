@@ -70,12 +70,12 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 <div class="scroll"><table>
 <thead><tr><th>Concepto</th><th>Boleta 1</th><th>Boleta 2</th><th>Boleta 3</th><th>Promedio</th></tr></thead>
 <tbody>
-<tr><td>Ingreso fijo</td><td><input id="f1" type="number" value="0" min="0"></td><td><input id="f2" type="number" value="0" min="0"></td><td><input id="f3" type="number" value="0" min="0"></td><td id="fp">S/ 0.00</td></tr>
-<tr><td>Ingreso variable</td><td><input id="v1" type="number" value="0" min="0"></td><td><input id="v2" type="number" value="0" min="0"></td><td><input id="v3" type="number" value="0" min="0"></td><td id="vp">S/ 0.00</td></tr>
-<tr><td>No constante</td><td><input id="nc1" type="number" value="0" min="0"></td><td><input id="nc2" type="number" value="0" min="0"></td><td><input id="nc3" type="number" value="0" min="0"></td><td id="ncp">S/ 0.00</td></tr>
-<tr><td>Adicional solo endeudamiento</td><td><input id="ad1" type="number" value="0" min="0"></td><td><input id="ad2" type="number" value="0" min="0"></td><td><input id="ad3" type="number" value="0" min="0"></td><td id="adp">S/ 0.00</td></tr>
-<tr><td>Descuento de ley</td><td><input id="l1" type="number" value="0" min="0"></td><td><input id="l2" type="number" value="0" min="0"></td><td><input id="l3" type="number" value="0" min="0"></td><td id="lp">S/ 0.00</td></tr>
-<tr><td>Facultativo</td><td><input id="fa1" type="number" value="0" min="0"></td><td><input id="fa2" type="number" value="0" min="0"></td><td><input id="fa3" type="number" value="0" min="0"></td><td id="fap">S/ 0.00</td></tr>
+<tr><td>Ingreso fijo</td><td><input id="f1" type="number" value="" min="0"></td><td><input id="f2" type="number" value="" min="0"></td><td><input id="f3" type="number" value="" min="0"></td><td id="fp">S/ 0.00</td></tr>
+<tr><td>Ingreso variable</td><td><input id="v1" type="number" value="" min="0"></td><td><input id="v2" type="number" value="" min="0"></td><td><input id="v3" type="number" value="" min="0"></td><td id="vp">S/ 0.00</td></tr>
+<tr><td>No constante</td><td><input id="nc1" type="number" value="" min="0"></td><td><input id="nc2" type="number" value="" min="0"></td><td><input id="nc3" type="number" value="" min="0"></td><td id="ncp">S/ 0.00</td></tr>
+<tr><td>Adicional solo endeudamiento</td><td><input id="ad1" type="number" value="" min="0"></td><td><input id="ad2" type="number" value="" min="0"></td><td><input id="ad3" type="number" value="" min="0"></td><td id="adp">S/ 0.00</td></tr>
+<tr><td>Descuento de ley</td><td><input id="l1" type="number" value="" min="0"></td><td><input id="l2" type="number" value="" min="0"></td><td><input id="l3" type="number" value="" min="0"></td><td id="lp">S/ 0.00</td></tr>
+<tr><td>Facultativo</td><td><input id="fa1" type="number" value="" min="0"></td><td><input id="fa2" type="number" value="" min="0"></td><td><input id="fa3" type="number" value="" min="0"></td><td id="fap">S/ 0.00</td></tr>
 </tbody>
 <tfoot><tr><td><b>Ingreso neto por boleta</b></td><td id="n1">S/ 0.00</td><td id="n2">S/ 0.00</td><td id="n3">S/ 0.00</td><td id="np">S/ 0.00</td></tr></tfoot>
 </table></div></div>
@@ -106,9 +106,9 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 esultado calculado automáticamente según RCI, facultativos y provisión del convenio.</small></div>
 </div>
 
-<div class="card"><h2>Parámetros del convenio</h2><div class="info" style="margin-bottom:10px"><b>Provisión automática:</b> se obtiene de la fila seleccionada del convenio y se muestra en soles. No se ingresa manualmente. Se descuenta después de aplicar el RCI.</div><div id="params" class="paramgrid"></div><div id="anti" class="info" style="margin-top:9px">Selecciona un perfil.</div></div>
+<div class="card"><h2>Parámetros del convenio</h2><div id="params" class="paramgrid"></div><div id="anti" class="info" style="margin-top:9px">Selecciona un perfil.</div></div>
+
 <div class="card"><h2>Consideraciones del convenio</h2><textarea id="gen" readonly></textarea><h2 style="margin-top:12px">Condiciones específicas</h2><textarea id="esp" readonly></textarea></div>
-<div class="card"><h2>Detalle del cálculo</h2><div id="detail" class="info">Aquí aparecerá el desglose.</div></div>
 </section></div></div></main>
 <footer>MCA CALCULADORA · Resultado referencial sujeto a políticas y evaluación del Banco.</footer>
 
@@ -202,8 +202,10 @@ const insuranceRate={"Sin devolución":0.05511,"Con devolución":0.05823,"PNP-Si
 function monthlyRate(tea){return Math.pow(1+tea,1/12)-1}
 function factor(tea,n){if(!tea||n<=0)return 0;let r=monthlyRate(tea);return r/(1-Math.pow(1+r,-n))}
 function avg(ids){
-  const vals=ids.map(id=>num(id));
-  return vals.reduce((a,b)=>a+b,0)/vals.length;
+  const vals=ids
+    .filter(id=>String($(id)?.value??"").trim()!=="")
+    .map(id=>num(id));
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
 }
 function setMoney(id,v){const el=$(id);if(el)el.textContent=money(v);}
 function calculateFinancialTable(){
@@ -256,7 +258,7 @@ function calc(){
   const availableEnd=Math.max(0,limite*globalBase-deudas-tcNoUtil);
   const maxPay=Math.max(0,Math.min(sacoLiquidez,availableEnd));
   const suggested=tea&&plazo?maxPay/factor(tea,plazo):0;
-  setMoney("cuota",cuota);setMoney("qmax",sacoLiquidez);setMoney("sug",suggested);
+  setMoney("cuota",cuota);setMoney("qmax",sacoLiquidez);setMoney("sug",suggested); setMoney("neto",Math.max(0,fi+va+nc+ad-ley-facult));
   if($("rate"))$("rate").textContent=tea?pct(tea):"—";if($("end"))$("end").textContent=pct(end);
   setMoney("fp",fi);setMoney("vp",va);setMoney("ncp",nc);setMoney("adp",ad);setMoney("lp",ley);setMoney("fap",facult);
   if($("params"))$("params").innerHTML=[
