@@ -44,10 +44,30 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 .login-card h2{margin:0 0 8px;color:#062b55}.login-card p{margin:0 0 20px;color:#64748b;font-size:13px}.login-card label{display:block;font-weight:700;font-size:12px;margin:12px 0 6px}.login-card input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:8px}.login-card button{width:100%;margin-top:18px;padding:12px;border:0;border-radius:8px;background:#062b55;color:#fff;font-weight:800;cursor:pointer}.login-error{color:#b42318;font-size:12px;margin-top:10px;min-height:16px}.logout-btn{margin-top:5px;border:0;background:none;color:#fff;font-size:9px;text-decoration:underline;cursor:pointer;padding:0}
 @media(max-width:800px){.promoter-box{min-width:120px}.promoter-box strong{font-size:12px}}
 </style>
+
+<style id="calculator-logo-v21">
+.calculator-logo{
+  display:block !important;
+  width:330px !important;
+  max-width:38vw !important;
+  height:auto !important;
+  max-height:78px !important;
+  object-fit:contain !important;
+  object-position:left center !important;
+  margin:0 !important;
+}
+@media(max-width:800px){
+  .calculator-logo{
+    width:260px !important;
+    max-width:55vw !important;
+    max-height:62px !important;
+  }
+}
+</style>
 </head>
 <body>
 <header><div class="head">
-<div class="brand"><div class="logo-zone mca-zone"><img src="logo-mca.png" alt="Master Center Américas"></div><div><div class="title">MCA CALCULADORA</div><div class="sub">Calculadora de Créditos por Convenio</div></div></div>
+<div class="brand"><div class="logo-zone mca-zone"><img src="logo-mca.png" alt="Master Center Américas"></div><div><div class="title"><img src="logo-calculadora.png" alt="Master Calculadora" class="calculator-logo"></div><div class="sub">Calculadora de Créditos por Convenio</div></div></div>
 <div style="display:flex;align-items:center;gap:14px"><div class="promoter-box" id="promoterBox"><span class="promoter-label">PROMOTOR</span><strong id="promoterName">No identificado</strong><small id="promoterMeta">Inicie sesión</small></div><div class="logo-zone bbva-zone"><img class="bbva" src="logo-bbva.png" alt="BBVA"></div></div>
 </div></header>
 
@@ -56,8 +76,8 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   <div class="login-card">
     <h2>MCA CALCULADORA</h2>
     <p>Acceso de promotores</p>
-    <label>Usuario</label>
-    <input id="loginUser" autocomplete="username" placeholder="Ingrese su usuario">
+    <label>Código o usuario</label>
+    <input id="loginUser" autocomplete="username" placeholder="Ej.: RP001 o RAULPEREZ">
     <label>Contraseña</label>
     <input id="loginPass" type="password" autocomplete="current-password" placeholder="Ingrese su contraseña">
     <button id="loginBtn" type="button">INGRESAR</button>
@@ -155,6 +175,31 @@ const num=id=>{
 const uniq=a=>[...new Set(a.filter(x=>x!==null&&x!==undefined&&String(x).trim()!=="").map(String))].sort((a,b)=>a.localeCompare(b,"es"));
 function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function fill(sel,arr,ph){sel.innerHTML='<option value="">'+ph+'</option>'+arr.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("")}
+
+function parseAccessCSV(txt){
+  txt=txt.replace(/^\uFEFF/,"");
+  const rows=[];let row=[],cell="",quoted=false;
+  for(let i=0;i<txt.length;i++){
+    const c=txt[i],n=txt[i+1];
+    if(c==='"'){
+      if(quoted&&n==='"'){cell+='"';i++;}else quoted=!quoted;
+    }else if(c===','&&!quoted){row.push(cell);cell="";}
+    else if((c==='\n'||c==='\r')&&!quoted){
+      if(c==='\r'&&n==='\n')i++;
+      row.push(cell);cell="";
+      if(row.some(v=>String(v).trim()!=="")){rows.push(row);row=[];}
+    }else cell+=c;
+  }
+  if(cell!==""||row.length){row.push(cell);if(row.some(v=>String(v).trim()!==""))rows.push(row);}
+  if(!rows.length)return [];
+  const h=rows[0].map(x=>String(x).trim()),out=[];
+  for(let i=1;i<rows.length;i++){
+    const a=rows[i],r={};
+    h.forEach((k,j)=>r[k]=String(a[j]??"").trim());
+    if(r.Usuario||r.Codigo)out.push(r);
+  }
+  return out;
+}
 function parseCSV(txt){
  txt=txt.replace(/^\uFEFF/,"");
  const rows=[]; let row=[], cell="", quoted=false;
@@ -329,8 +374,17 @@ function doLogout(){
 function loginUser(){
   const u=String($("loginUser")?.value||"").trim().toUpperCase();
   const p=String($("loginPass")?.value||"");
-  const found=ACCESS.find(x=>String(x.Usuario||"").trim().toUpperCase()===u && String(x.Clave||"")===p && String(x.Estado||"ACTIVO").toUpperCase()==="ACTIVO");
-  if(!found){$("loginError").textContent="Usuario, contraseña o estado incorrecto.";return;}
+  const found=ACCESS.find(x=>{
+    const user=String(x.Usuario||"").trim().toUpperCase();
+    const code=String(x.Codigo||"").trim().toUpperCase();
+    const key=String(x.Clave||"");
+    const active=String(x.Estado||"ACTIVO").trim().toUpperCase()==="ACTIVO";
+    return active && key===p && (user===u || code===u);
+  });
+  if(!found){
+    $("loginError").textContent="Código/usuario o contraseña incorrectos.";
+    return;
+  }
   sessionStorage.setItem("mca_promotor",JSON.stringify(found));
   setPromoter(found);
   $("loginOverlay").style.display="none";
@@ -347,8 +401,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   try{
     fetch("base_accesos_editable.csv?ts="+Date.now(),{cache:"no-store"})
       .then(r=>r.ok?r.text():Promise.reject())
-      .then(t=>{ACCESS=parseCSV(t);initAccess();})
-      .catch(()=>{ACCESS=[{"Usuario":"PROMOTOR001","Clave":"123456","Promotor":"Promotor Demo","Codigo":"PR001","Supervisor":"Supervisor Demo","Plaza":"Lima","Estado":"ACTIVO"}];initAccess();});
+      .then(t=>{ACCESS=parseAccessCSV(t);initAccess();})
+      .catch(()=>{ACCESS=[];initAccess();});
     $("loginBtn").addEventListener("click",loginUser);
     $("loginPass").addEventListener("keydown",e=>{if(e.key==="Enter")loginUser();});
     document.querySelectorAll("input").forEach(x=>{

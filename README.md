@@ -1,24 +1,15 @@
-# MCA CALCULADORA V20
+# MCA CALCULADORA V22
 
-## Acceso de promotores
+Corrección del acceso de promotores.
 
-Se eliminó del encabezado el contador `238 convenios · 548 perfiles`.
+### Acceso de Raul Perez
+- Código: `RP001`
+- Usuario: `RAULPEREZ`
+- Contraseña: `1234567`
+- Estado: ACTIVO
 
-Ahora el encabezado muestra los datos del promotor autenticado:
-- Nombre
-- Código
-- Plaza
-- Supervisor
+El login acepta indistintamente **Código o usuario**.
 
-La información proviene de `base_accesos_editable.csv`.
+Se corrigió el problema por el cual la base de accesos se estaba intentando leer con el parser de la base de convenios. Ahora `base_accesos_editable.csv` tiene su propio parser.
 
-### Base de accesos
-Columnas:
-`Usuario, Clave, Promotor, Codigo, Supervisor, Plaza, Estado`
-
-Reemplazar el registro DEMO por los usuarios reales.
-
-### Importante
-GitHub Pages es un sitio estático. Esta base CSV sirve para control funcional/prototipo, pero NO es un sistema de autenticación seguro para producción: las credenciales pueden ser inspeccionadas por usuarios con conocimientos técnicos. Para producción se recomienda un backend o servicio de autenticación.
-
-El resto de la calculadora y la base de convenios se mantienen.
+No existe usuario demo de respaldo si la base de accesos no carga.
