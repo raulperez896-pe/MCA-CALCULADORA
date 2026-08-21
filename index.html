@@ -273,7 +273,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v44-responsive">
-/* V55: el cronograma se calcula internamente; su detalle queda oculto. */
+/* V56: el cronograma se calcula internamente; su detalle queda oculto. */
 @media (max-width: 900px){
   body{overflow-x:hidden}
   .container,.page,.main-container{width:100%!important;max-width:100%!important}
@@ -364,7 +364,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 @media(max-width:900px){.cron-table-wrap{max-height:60vh;min-height:260px}.cron-base-notes{font-size:10px}}
 </style>
 <style id="mca-v52-excel-cron">
-/* V55 — visual de la hoja Cronograma de la calculadora base */
+/* V56 — visual de la hoja Cronograma de la calculadora base */
 #cronogramaView{
   font-family:Roboto,Arial,sans-serif!important;
   color:#202428;
@@ -717,7 +717,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v55-base-layout">
-/* V55 - distribución tipo hoja Cronograma de Excel */
+/* V56 - distribución tipo hoja Cronograma de Excel */
 #cronogramaView .cron-sheet{
   max-width:1180px;
   padding:10px 14px 24px;
@@ -790,6 +790,14 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
     grid-column:auto;grid-row:auto;
   }
 }
+</style>
+
+<style id="mca-v56-cron-rows">
+#cronogramaView .cron-ellipsis-row td{font-weight:700;text-align:center;height:12px;padding:0}
+#cronogramaView .cron-last-summary-row td{font-weight:600}
+#cronogramaView .cron-last-summary-row td:first-child{background:#f7d99f;font-weight:700}
+#cronogramaView .cron-total-row td{font-weight:700;border-top:2px solid #333}
+#cronogramaView .cron-base-table th,#cronogramaView .cron-base-table td{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1476,7 +1484,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-    MOTOR V55 — replica la hoja "Cronograma" de la calculadora base.
+    MOTOR V56 — replica la hoja "Cronograma" de la calculadora base.
 
     TED = (1 + TEA)^(1/360) - 1
 
@@ -1590,10 +1598,13 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   const firstAmort=firstTotalCuota-firstInterest;
   const firstSaldo=Math.max(0,capitalInicial-firstAmort);
 
-  // TCEA de referencia usando la tasa diaria efectiva.
-  const tcea=Math.pow(1+ted, (plazo+graceN)*30)-1;
+  // TCEA referencial: conversión de TEA a tasa mensual efectiva y
+  // adición del costo mensual del seguro desgravamen. No se anualiza
+  // multiplicando la tasa diaria por los días del plazo.
+  const tasaMensualNominal=tea/12;
+  const tcea=Math.pow(1+tasaMensualNominal+insuranceRate,12)-1;
 
-  // La V55 cambió los IDs visuales de la hoja. Escribimos en los
+  // La V56 cambió los IDs visuales de la hoja. Escribimos en los
   // campos nuevos y, si existen, también en los IDs antiguos.
   const cronSet=(ids,v)=>{
     (Array.isArray(ids)?ids:[ids]).forEach(id=>{
@@ -1638,15 +1649,14 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
       money2(graceInterest),"S/ 0.00",
       money2(graceInterest),"S/ 0.00",money2(graceInterest)
     ];
-    vals.forEach(v=>{
-      const td=document.createElement("td");
-      td.textContent=v;
-      tr.appendChild(td);
-    });
+    vals.forEach(v=>{ const td=document.createElement("td"); td.textContent=v; tr.appendChild(td); });
     body.appendChild(tr);
   }
 
-  // Cuotas: Total a Pagar queda constante, exactamente como V37.
+  // Generamos todas las cuotas para conservar el cálculo completo, pero
+  // visualmente mostramos las 12 primeras y un resumen de la última cuota,
+  // exactamente como la hoja Cronograma de la calculadora base.
+  const rows=[];
   let saldo=capitalInicial;
   let totalAmort=0,totalInteres=0,totalCom=0,totalCuota=0,totalSeguro=0,totalPagar=0;
 
@@ -1656,21 +1666,12 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
     const cuotaPeriodo=cuotaConstante-seguroMonto;
     const amort=Math.max(0,cuotaPeriodo-interes);
     const saldoFinal=Math.max(0,saldo-amort);
-
-    const tr=document.createElement("tr");
-    const vals=[
-      i+1,fmtDate(period.due),money2(saldo),
-      "("+money2(amort).replace("S/ ","")+")",
-      money2(interes),"S/ 0.00",
-      money2(cuotaPeriodo),money2(seguroMonto),money2(cuotaPeriodo+seguroMonto)
-    ];
-    vals.forEach(v=>{
-      const td=document.createElement("td");
-      td.textContent=v;
-      tr.appendChild(td);
-    });
-    body.appendChild(tr);
-
+    const row={
+      n:i+1,due:period.due,saldo,amort,interes,com:0,
+      cuota:cuotaPeriodo,seguro:seguroMonto,total:cuotaPeriodo+seguroMonto,
+      saldoFinal
+    };
+    rows.push(row);
     totalAmort+=amort;
     totalInteres+=interes;
     totalCom+=0;
@@ -1680,16 +1681,53 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
     saldo=saldoFinal;
   });
 
+  const appendRow=(row)=>{
+    const tr=document.createElement("tr");
+    const vals=[
+      row.n,fmtDate(row.due),money2(row.saldo),
+      "("+money2(row.amort).replace("S/ ","")+")",
+      money2(row.interes),money2(row.com),money2(row.cuota),
+      money2(row.seguro),money2(row.total)
+    ];
+    vals.forEach(v=>{ const td=document.createElement("td"); td.textContent=v; tr.appendChild(td); });
+    body.appendChild(tr);
+  };
+
+  rows.slice(0,12).forEach(appendRow);
+
+  if(rows.length>12){
+    const ell=document.createElement("tr");
+    ell.className="cron-ellipsis-row";
+    ["…","…","…","…","…","…","…","…","…"].forEach(v=>{
+      const td=document.createElement("td"); td.textContent=v; ell.appendChild(td);
+    });
+    body.appendChild(ell);
+  }
+
+  // Última cuota/resumen. Conservamos exactamente los valores de la
+  // última cuota calculada por el motor, no una estimación.
+  if(rows.length>12){
+    const last=rows[rows.length-1];
+    const tr=document.createElement("tr");
+    tr.className="cron-last-summary-row";
+    const vals=[
+      last.n,fmtDate(last.due),money2(last.saldoFinal),
+      "("+money2(last.amort).replace("S/ ","")+")",
+      money2(last.interes),money2(last.com),money2(last.cuota),
+      money2(last.seguro),money2(last.total)
+    ];
+    vals.forEach(v=>{ const td=document.createElement("td"); td.textContent=v; tr.appendChild(td); });
+    body.appendChild(tr);
+  }
+
   const totalTr=document.createElement("tr");
   totalTr.className="cron-total-row";
   [
     "Totales","",money2(saldo),
-    money2(totalAmort),money2(totalInteres),"S/ 0.00",
+    money2(totalAmort),money2(totalInteres),money2(totalCom),
     money2(totalCuota),money2(totalSeguro),money2(totalPagar)
   ].forEach(v=>{
-    const td=document.createElement("td");
-    td.textContent=v;
-    totalTr.appendChild(td);
+    const td=document.createElement("td"); td.textContent=v; totalTr.appendChild(td);
   });
   body.appendChild(totalTr);
 
