@@ -584,7 +584,8 @@ function calc(){
   const deudas=totalOtherBankQuotas();
   const globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley);
   const limite=edad>60?parsePct(r["Endeudamiento máximo \n(+ 60 años)"]):parsePct(r["Endeudamiento máximo \n(- 60 años)"]);
-  const obligacionesFinales=Math.max(0,deudas+cuota);\n  const end=globalBase?obligacionesFinales/globalBase:0;
+  const obligacionesFinales=Math.max(0,deudas+cuota);
+  const end=globalBase?obligacionesFinales/globalBase:0;
   const maxAge=Number(r["Edad máxima al finalizar el crédito (Años)"])||999,ageEnd=edad+plazo/12,alerts=[];
   if(!b)alerts.push("Selecciona el buró para aplicar la tasa correcta.");
   else if(!allowed(r["Buró"],b))alerts.push("El buró "+b+" no está permitido para este perfil ("+(r["Buró"]||"no informado")+")");
@@ -643,54 +644,68 @@ $("cargo").addEventListener("change",()=>{
 ["cond","buro","seguro"].forEach(id=>$(id).addEventListener("change",calc));
 document.querySelectorAll("input").forEach(x=>x.addEventListener("input",calc));
 
-let ACCESS=[];
+const ACCESS_FALLBACK=[{"Usuario":"RAULPEREZ","Clave":"1234567","Promotor":"Raul Perez","Codigo":"RP001","Supervisor":"Gerencia Territorial","Plaza":"Lima","Estado":"ACTIVO"},{"Usuario":"CAROL_ALVAREZ","Clave":"1234567","Promotor":"Carol Alvarez","Codigo":"RP002","Supervisor":"Supervisora Puno","Plaza":"Puno","Estado":"ACTIVO"}];
+let ACCESS=ACCESS_FALLBACK.slice();
 function setPromoter(user){
   const name=$("promoterName"),meta=$("promoterMeta");
-  if(name)name.textContent=user.Promotor||user.Usuario;
+  if(name)name.textContent=user.Promotor||user.Usuario||user.Codigo||"Promotor";
   if(meta)meta.textContent=[user.Codigo,user.Plaza,user.Supervisor].filter(Boolean).join(" · ");
 }
 function doLogout(){
   sessionStorage.removeItem("mca_promotor");
   location.reload();
 }
+function cleanLogin(v){
+  return String(v??"").replace(/^\uFEFF/,"").trim().toUpperCase();
+}
 function loginUser(){
-  const u=String($("loginUser")?.value||"").trim().toUpperCase();
-  const p=String($("loginPass")?.value||"");
+  const u=cleanLogin($("loginUser")?.value);
+  const p=String($("loginPass")?.value??"").trim();
   const found=ACCESS.find(x=>{
-    const user=String(x.Usuario||"").trim().toUpperCase();
-    const code=String(x.Codigo||"").trim().toUpperCase();
-    const key=String(x.Clave||"");
-    const active=String(x.Estado||"ACTIVO").trim().toUpperCase()==="ACTIVO";
-    return active && key===p && (user===u || code===u);
+    const user=cleanLogin(x.Usuario);
+    const code=cleanLogin(x.Codigo);
+    const key=String(x.Clave??"").trim();
+    const estado=cleanLogin(x.Estado||"ACTIVO");
+    return estado==="ACTIVO" && key===p && (user===u || code===u);
   });
   if(!found){
-    $("loginError").textContent="Código/usuario o contraseña incorrectos.";
-    return;
+    const e=$("loginError");
+    if(e)e.textContent="Código/usuario o contraseña incorrectos.";
+    return false;
   }
   sessionStorage.setItem("mca_promotor",JSON.stringify(found));
   setPromoter(found);
   $("loginOverlay").style.display="none";
+  return true;
 }
 function initAccess(){
   const saved=sessionStorage.getItem("mca_promotor");
   if(saved){
-    try{const u=JSON.parse(saved);setPromoter(u);$("loginOverlay").style.display="none";return;}catch(e){}
+    try{
+      const u=JSON.parse(saved);
+      const valid=ACCESS.some(x=>cleanLogin(x.Usuario)===cleanLogin(u.Usuario) || cleanLogin(x.Codigo)===cleanLogin(u.Codigo));
+      if(valid){setPromoter(u);$("loginOverlay").style.display="none";return;}
+    }catch(e){}
+    sessionStorage.removeItem("mca_promotor");
   }
   $("loginOverlay").style.display="flex";
 }
-
 document.addEventListener("DOMContentLoaded",()=>{
   try{
+    // The embedded access list is always available, even if GitHub Pages
+    // has not yet refreshed base_accesos_editable.csv.
+    ACCESS=ACCESS_FALLBACK.slice();
     fetch("base_accesos_editable.csv?ts="+Date.now(),{cache:"no-store"})
-      .then(r=>r.ok?r.text():Promise.reject())
+      .then(r=>r.ok?r.text():Promise.reject(new Error("CSV no disponible")))
       .then(t=>{
-        ACCESS=parseAccessCSV(t);
-        if(!ACCESS.length){
-          console.warn("La base de accesos está vacía o tiene un formato no reconocido.");
-        }
+        const loaded=parseAccessCSV(t);
+        if(loaded.length) ACCESS=loaded;
         initAccess();
       })
-      .catch(()=>{ACCESS=[];initAccess();});
+      .catch(()=>{
+        // Keep embedded users if the CSV cannot be fetched.
+        initAccess();
+      });
     $("loginBtn").addEventListener("click",loginUser);
     $("loginPass").addEventListener("keydown",e=>{if(e.key==="Enter")loginUser();});
     document.querySelectorAll("input").forEach(x=>{

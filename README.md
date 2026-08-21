@@ -1,13 +1,9 @@
-# MCA CALCULADORA V31
+# MCA CALCULADORA V32
 
-Correcciones definitivas:
-
-- La base de 238 convenios / 548 perfiles queda embebida dentro de `index.html`, por lo que la calculadora no depende de que GitHub cargue el CSV para mostrar tasas y parámetros.
-- Se mantiene `base_convenios_editable.csv` para futuras actualizaciones.
-- Se corrigió el error de cálculo de endeudamiento que impedía continuar la función `calc()`.
-- La tasa se calcula por Buró + Tasa Con Seguro / Tasa Sin Seguro y reconoce rangos consecutivos.
-- Los parámetros del convenio se cargan con Convenio + Cargo + Condición.
-- Si solo se llena Boleta 1, los promedios se calculan con divisor 1, no con 3.
-- Si se llenan dos boletas, el promedio usa 2; con tres, usa 3.
-- El autollenado de B2/B3 al ingresar ingreso variable se mantiene.
-- El ancho de Datos financieros y Parámetros se mantiene en la nueva distribución.
+Corrección de acceso:
+- Usuarios y claves quedan embebidos dentro de `index.html`.
+- `base_accesos_editable.csv` sigue siendo la base editable y, si está disponible, reemplaza la lista embebida.
+- El login funciona aunque GitHub Pages todavía tenga cacheado/no disponible el CSV.
+- Acepta usuario o código.
+- `RAULPEREZ / 1234567` y `RP001 / 1234567` están incluidos como ACTIVO.
+- Si existe una sesión vieja inválida, se limpia automáticamente.
