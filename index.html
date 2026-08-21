@@ -733,26 +733,26 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 #cronogramaView .cron-field label{font-size:12px;margin:0 0 3px 2px}
 #cronogramaView .sheet-value,#cronogramaView .sheet-input{min-height:24px;font-size:12px;padding:4px 6px;border-radius:0;text-align:left}
 #cronogramaView .convenio-field{grid-column:1;grid-row:1}
-#cronogramaView .cargo-field{grid-column:2;grid-row:1}
-#cronogramaView .rates-field{grid-column:4;grid-row:1 / span 2}
+#cronogramaView .cargo-field{grid-column:4;grid-row:1}
+#cronogramaView .rates-field{grid-column:4;grid-row:2}
 #cronogramaView .special-field{grid-column:1;grid-row:2}
-#cronogramaView .cuotas-field{grid-column:2;grid-row:2}
+#cronogramaView .cuotas-field{grid-column:1;grid-row:3}
 #cronogramaView .rates-sin-field{grid-column:4;grid-row:3 / span 2}
-#cronogramaView .editable-field{grid-column:1;grid-row:3}
+#cronogramaView .editable-field{grid-column:1;grid-row:4}
 #cronogramaView .gracia-field{grid-column:2;grid-row:3}
-#cronogramaView .insurance-field{grid-column:3;grid-row:3}
-#cronogramaView .solicitud-field{grid-column:4;grid-row:5}
-#cronogramaView .dni-field{grid-column:1;grid-row:4}
+#cronogramaView .insurance-field{grid-column:2;grid-row:4}
+#cronogramaView .solicitud-field{grid-column:4;grid-row:4}
+#cronogramaView .dni-field{grid-column:1;grid-row:5}
 #cronogramaView .duration-field{grid-column:2;grid-row:4}
-#cronogramaView .seguro-importe-field{grid-column:3;grid-row:4}
-#cronogramaView .corte-field{grid-column:4;grid-row:6}
-#cronogramaView .monto-field{grid-column:1;grid-row:5}
-#cronogramaView .tea-field{grid-column:2;grid-row:5}
-#cronogramaView .tcea-field{grid-column:3;grid-row:5}
-#cronogramaView .pago-field{grid-column:4;grid-row:7}
-#cronogramaView .desembolso-field{grid-column:1;grid-row:6}
-#cronogramaView .primer-field{grid-column:4;grid-row:8}
-#cronogramaView .qmax-field{grid-column:4;grid-row:9}
+#cronogramaView .seguro-importe-field{grid-column:2;grid-row:5}
+#cronogramaView .corte-field{grid-column:4;grid-row:5}
+#cronogramaView .monto-field{grid-column:1;grid-row:6}
+#cronogramaView .tea-field{grid-column:1;grid-row:7}
+#cronogramaView .tcea-field{grid-column:2;grid-row:6}
+#cronogramaView .pago-field{grid-column:4;grid-row:6}
+#cronogramaView .desembolso-field{grid-column:1;grid-row:8}
+#cronogramaView .primer-field{grid-column:4;grid-row:7}
+#cronogramaView .qmax-field{grid-column:4;grid-row:8}
 #cronogramaView .second-rate-label{display:none}
 
 @media(max-width:850px){
@@ -1389,7 +1389,8 @@ function parseNumLoose(v){
   return Number.isFinite(n)?n:0;
 }
 function money2(v){
-  return "S/ "+(Number(v)||0).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const n=Number(v);
+  return "S/ "+(Number.isFinite(n)?n:0).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 function fmtDate(d){
   if(!(d instanceof Date)||Number.isNaN(d.getTime()))return "—";
@@ -1575,7 +1576,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   // Datos superiores, siguiendo las referencias de la hoja.
   const first=periods[0];
   const firstInterest=capitalInicial*first.h;
-  const firstInsurance=first.insuranceFactor*capitalInicial;
+  const firstInsurance=Math.max(0,first.insuranceFactor*capitalInicial);
   const firstTotalCuota=cuotaConstante-firstInsurance;
   const firstAmort=firstTotalCuota-firstInterest;
   const firstSaldo=Math.max(0,capitalInicial-firstAmort);
@@ -1752,9 +1753,13 @@ function syncCronSheetFields(r, seguro){
   set("cronCorte2",r["Fecha de corte "]??r["Fecha de corte"]??"—");
   set("cronPago2",r["Fecha de pago"]??"—");
   set("cronQmax2",$("qmax")?.textContent||"S/ 0.00");
-  set("cronPrimer2",$("cronPrimerVencimiento")?.textContent||"—");
-  set("cronTcea2",$("cronTcea")?.textContent||"—");
-  set("cronSeguroImporte2",$("cronSeguroImporte")?.textContent||"S/ 0.00");
+  // No sobrescribir los valores calculados por el motor del cronograma.
+  // Estos campos deben conservar Primer vencimiento, TCEA e Importe de seguro.
+  if(!window.mcaLastCron){
+    set("cronPrimer2","—");
+    set("cronTcea2","—");
+    set("cronSeguroImporte2","S/ 0.00");
+  }
 
   const p=parseInt($("plazo")?.value||"0",10)||0;
   const g=parseInt(r["Periodo de gracia"]||"0",10)||0;
