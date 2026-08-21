@@ -200,22 +200,31 @@ function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&l
 function fill(sel,arr,ph){sel.innerHTML='<option value="">'+ph+'</option>'+arr.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("")}
 
 function parseAccessCSV(txt){
-  txt=txt.replace(/^\uFEFF/,"");
+  txt=String(txt??"").replace(/^\uFEFF/,"");
+  // Acepta CSV separado por coma o punto y coma, con o sin BOM.
+  const delimiter=(txt.split(/\r?\n/,1)[0].includes(";") && !txt.split(/\r?\n/,1)[0].includes(",")) ? ";" : ",";
   const rows=[];let row=[],cell="",quoted=false;
   for(let i=0;i<txt.length;i++){
     const c=txt[i],n=txt[i+1];
     if(c==='"'){
-      if(quoted&&n==='"'){cell+='"';i++;}else quoted=!quoted;
-    }else if(c===','&&!quoted){row.push(cell);cell="";}
-    else if((c==='\n'||c==='\r')&&!quoted){
+      if(quoted&&n==='"'){cell+='"';i++;}else{quoted=!quoted;}
+    }else if(c===delimiter&&!quoted){
+      row.push(cell);cell="";
+    }else if((c==='\n'||c==='\r')&&!quoted){
       if(c==='\r'&&n==='\n')i++;
       row.push(cell);cell="";
       if(row.some(v=>String(v).trim()!=="")){rows.push(row);row=[];}
-    }else cell+=c;
+    }else{
+      cell+=c;
+    }
   }
-  if(cell!==""||row.length){row.push(cell);if(row.some(v=>String(v).trim()!==""))rows.push(row);}
+  if(cell!==""||row.length){
+    row.push(cell);
+    if(row.some(v=>String(v).trim()!==""))rows.push(row);
+  }
   if(!rows.length)return [];
-  const h=rows[0].map(x=>String(x).trim()),out=[];
+  const h=rows[0].map(x=>String(x).trim().replace(/^\uFEFF/,""));
+  const out=[];
   for(let i=1;i<rows.length;i++){
     const a=rows[i],r={};
     h.forEach((k,j)=>r[k]=String(a[j]??"").trim());
@@ -223,6 +232,7 @@ function parseAccessCSV(txt){
   }
   return out;
 }
+
 function parseCSV(txt){
  txt=txt.replace(/^\uFEFF/,"");
  const rows=[]; let row=[], cell="", quoted=false;
@@ -611,7 +621,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   try{
     fetch("base_accesos_editable.csv?ts="+Date.now(),{cache:"no-store"})
       .then(r=>r.ok?r.text():Promise.reject())
-      .then(t=>{ACCESS=parseAccessCSV(t);initAccess();})
+      .then(t=>{
+        ACCESS=parseAccessCSV(t);
+        if(!ACCESS.length){
+          console.warn("La base de accesos está vacía o tiene un formato no reconocido.");
+        }
+        initAccess();
+      })
       .catch(()=>{ACCESS=[];initAccess();});
     $("loginBtn").addEventListener("click",loginUser);
     $("loginPass").addEventListener("keydown",e=>{if(e.key==="Enter")loginUser();});
