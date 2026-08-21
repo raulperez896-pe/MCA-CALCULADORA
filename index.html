@@ -84,6 +84,23 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 .debt-full .debt-table th{white-space:nowrap}
 @media(max-width:1100px){.financial-param-wrap{grid-template-columns:1fr}}
 @media(max-width:900px){.debt-full .debt-table{min-width:760px}}
+</style><style id="layout-v30">
+.financial-param-wrap{
+  display:grid;
+  grid-template-columns:minmax(0,2fr) minmax(260px,1fr);
+  gap:16px;
+  width:100%;
+  align-items:start;
+}
+.financial-param-wrap>.financial-card,
+.financial-param-wrap>.card{min-width:0}
+.financial-param-wrap .financial-card .card{width:100%;box-sizing:border-box}
+.financial-param-wrap .financial-card .grid2{width:100%}
+.financial-param-wrap .financial-card .card{margin-bottom:0}
+.financial-param-wrap #params{min-height:40px}
+@media(max-width:1000px){
+  .financial-param-wrap{grid-template-columns:1fr}
+}
 </style></head>
 <body>
 <header><div class="head">
@@ -257,7 +274,26 @@ function parseCSV(txt){
  }
  return out;
 }
-function current(){return DATA.find(r=>r.Convenio===$("conv").value&&r.Cargo===$("cargo").value&&r["Condicion especial"]===$("cond").value)||null}
+function normKey(v){
+  return String(v??"")
+    .replace(/\uFEFF/g,"")
+    .replace(/\u00A0/g," ")
+    .replace(/\r?\n/g," ")
+    .replace(/\s+/g," ")
+    .trim()
+    .toLocaleLowerCase("es");
+}
+function current(){
+  const conv=normKey($("conv")?.value);
+  const cargo=normKey($("cargo")?.value);
+  const cond=normKey($("cond")?.value);
+  if(!conv||!cargo||!cond)return null;
+  return DATA.find(r=>
+    normKey(r.Convenio)===conv &&
+    normKey(r.Cargo)===cargo &&
+    normKey(r["Condicion especial"])===cond
+  )||null;
+}
 function parsePct(v){if(v===""||v==null)return 0;if(typeof v==="number")return v>1?v/100:v;let m=String(v).replace(",",".").match(/-?\d+(?:\.\d+)?/);if(!m)return 0;let n=+m[0];return n>1?n/100:n}
 function parseMoney(v){if(v===""||v==null)return 0;if(typeof v==="number")return v;let s=String(v).replace(/S\.?\/?\s*/gi,"").replace(/,/g,".");let m=s.match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):0}
 function bureauRank(b){
@@ -292,8 +328,8 @@ function allowed(rule,b){
  return String(rule).toUpperCase().includes(String(b).toUpperCase());
 }
 function rateFrom(text,b){
- const s=String(text||"").toUpperCase();
- const re=/(NB|G\d)\s*-\s*(NB|G\d|OTROS)\s*:\s*([0-9]+(?:[.,][0-9]+)?)\s*%/g;
+ const s=String(text||"").toUpperCase().replace(/\u00A0/g," ");
+ const re=/(NB|G\d)\s*(?:-|A)\s*(NB|G\d|OTROS)\s*:\s*([0-9]+(?:[.,][0-9]+)?)\s*%/g;
  let m;
  while((m=re.exec(s))){
    if(rangeIncludes(m[1],m[2],b)) return parseFloat(m[3].replace(",","."))/100;
@@ -370,7 +406,7 @@ function calculateFinancialTable(){
 function resetResult(){
   $("status").className="status neutral";
   $("status").textContent="Selecciona convenio, cargo y condición";
-  $("alerts").innerHTML=""; $("params").innerHTML="";
+  $("alerts").innerHTML=""; if($("params"))$("params").innerHTML="";
   $("gen").value=""; $("esp").value="";
   $("anti").textContent="Selecciona un perfil.";
   calculateFinancialTable();
@@ -521,7 +557,15 @@ function numElement(el){
 function calc(){
   calculateFinancialTable();
   const r=current();
-  if(!r){resetResult();return;}
+  if(!r){
+    resetResult();
+    if($("conv")?.value && $("cargo")?.value && $("cond")?.value){
+      console.warn("MCA: perfil no encontrado", {
+        convenio:$("conv").value, cargo:$("cargo").value, condicion:$("cond").value
+      });
+    }
+    return;
+  }
   const b=$("buro")?.value||"",edad=num("edad"),plazo=num("plazo"),monto=num("monto"),seguro=$("seguro")?.value||"";
   const tea=rateFrom(seguro==="Sin seguro"?r["Tasa Sin Seguro"]:r["Tasa Con Seguro"],b);
   const fi=avg(["f1","f2","f3"]),va=avg(["v1","v2","v3"]),nc=avg(["nc1","nc2","nc3"]),ad=avg(["ad1","ad2","ad3"]),ley=avg(["l1","l2","l3"]),facult=avg(["fa1","fa2","fa3"]);
@@ -576,8 +620,21 @@ function init(){
    $("conv").innerHTML='<option value="">Error al cargar convenios</option>';
  }
 }
-$("conv").addEventListener("change",()=>{let a=DATA.filter(r=>r.Convenio===$("conv").value);fill($("cargo"),uniq(a.map(r=>r.Cargo)),"Seleccione cargo");$("cargo").disabled=false;$("cond").disabled=true;calc()});
-$("cargo").addEventListener("change",()=>{let a=DATA.filter(r=>r.Convenio===$("conv").value&&r.Cargo===$("cargo").value);fill($("cond"),uniq(a.map(r=>r["Condicion especial"])),"Seleccione condición");$("cond").disabled=false;calc()});
+$("conv").addEventListener("change",()=>{
+  const cv=normKey($("conv").value);
+  let a=DATA.filter(r=>normKey(r.Convenio)===cv);
+  fill($("cargo"),uniq(a.map(r=>r.Cargo)),"Seleccione cargo");
+  $("cargo").disabled=false;$("cond").disabled=true;
+  $("cond").innerHTML='<option value="">Seleccione condición</option>';
+  calc();
+});
+$("cargo").addEventListener("change",()=>{
+  const cv=normKey($("conv").value), cg=normKey($("cargo").value);
+  let a=DATA.filter(r=>normKey(r.Convenio)===cv&&normKey(r.Cargo)===cg);
+  fill($("cond"),uniq(a.map(r=>r["Condicion especial"])),"Seleccione condición");
+  $("cond").disabled=false;
+  calc();
+});
 ["cond","buro","seguro"].forEach(id=>$(id).addEventListener("change",calc));
 document.querySelectorAll("input").forEach(x=>x.addEventListener("input",calc));
 
