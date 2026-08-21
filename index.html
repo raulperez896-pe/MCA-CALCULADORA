@@ -273,7 +273,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v44-responsive">
-/* V47: el cronograma se calcula internamente; su detalle queda oculto. */
+/* V48: el cronograma se calcula internamente; su detalle queda oculto. */
 @media (max-width: 900px){
   body{overflow-x:hidden}
   .container,.page,.main-container{width:100%!important;max-width:100%!important}
@@ -306,6 +306,11 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 
 <style id="mca-v46-maxterm">
 #plazoMaximoHint{display:block;margin-top:5px;font-size:10px;color:#64748b}
+</style>
+
+<style id="mca-v48-enddate">
+#fechaFinPrestamoHint{display:block;margin-top:5px;font-size:10px;color:#64748b}
+@media(max-width:640px){#fechaFinPrestamoResultado{font-size:16px}}
 </style>
 </head>
 <body>
@@ -384,6 +389,11 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 <div class="result-box">
   <span>PLAZO MÁXIMO</span>
   <strong id="plazoMaximoResultado">—</strong><small id="plazoMaximoHint">Edad máxima + límite de cuotas del convenio</small>
+</div>
+<div class="result-box">
+  <span>FECHA FIN DEL PRÉSTAMO</span>
+  <strong id="fechaFinPrestamoResultado">—</strong>
+  <small id="fechaFinPrestamoHint">Último vencimiento según el plazo máximo</small>
 </div>
 <div id="status" class="status neutral">Selecciona convenio, cargo y condición</div><div id="alerts"></div>
 esultado calculado automáticamente según RCI, facultativos y provisión del convenio.</small></div>
@@ -905,7 +915,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-   MODELO V47 — réplica del cronograma mostrado por el usuario.
+   MODELO V48 — réplica del cronograma mostrado por el usuario.
 
    1. Fecha de desembolso + corte + vencimiento determinan el primer periodo
       de gracia.
@@ -1126,10 +1136,9 @@ function actualizarPlazoMaximo(){
   const dob=$("fechaNacimiento");
   const desemb=$("fechaDesembolso");
   const out=$("plazoMaximoResultado");
+  const dateOut=$("fechaFinPrestamoResultado");
   if(!dob||!out)return null;
 
-  // Use the exact profile selected by the existing calculator.
-  // The real IDs are conv / cargo / cond and the profile resolver is current().
   let r=null;
   try{
     if(typeof current==="function") r=current();
@@ -1147,30 +1156,32 @@ function actualizarPlazoMaximo(){
     r?.["Edad Maxima"]
   );
 
-  let max=calcularPlazoMaximo(
-    dob.value,
-    desemb?.value,
-    edadMax
-  );
+  let max=calcularPlazoMaximo(dob.value,desemb?.value,edadMax);
 
-  // The convention's maximum number of installments is an additional ceiling.
   const cuotasMax=parseNumLoose(r?.["Cuotas máximas (meses)"]);
   if(max!==null && cuotasMax>0) max=Math.min(max,cuotasMax);
 
   if(max===null){
     out.textContent="—";
+    if(dateOut)dateOut.textContent="—";
     return null;
   }
 
   if(max<=0){
     out.textContent="NO OTORGABLE";
+    if(dateOut)dateOut.textContent="—";
     return 0;
   }
 
   out.textContent=max+" meses";
+
+  // Fecha de término efectiva del préstamo: fecha de desembolso + plazo máximo.
+  const desembObj=parseInputDate(desemb?.value);
+  const fechaFin=desembObj?addMonthsSafe2(desembObj,max):null;
+  if(dateOut)dateOut.textContent=fechaFin?fmtDate(fechaFin):"—";
+
   return max;
 }
-
 
 function calc(){
   calculateFinancialTable();

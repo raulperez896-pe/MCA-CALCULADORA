@@ -1,9 +1,9 @@
-# MCA CALCULADORA V47
+# MCA CALCULADORA V48
 
-Corrección definitiva del plazo máximo:
-- Usa la columna real de la base: `Edad máxima al finalizar el crédito (Años)`.
-- Calcula el último vencimiento permitido un mes antes del cumpleaños de la edad máxima.
-- Convierte el periodo desde la fecha de desembolso a meses completos.
-- Aplica además `Cuotas máximas (meses)` del convenio como límite superior.
-- Actualiza al cambiar fecha de nacimiento, fecha de desembolso, convenio, cargo o condición.
-- La cuota y el motor de cronograma se mantienen sin cambios.
+Cambios:
+- Mantiene el cálculo del plazo máximo de V47.
+- Añade `FECHA FIN DEL PRÉSTAMO` en Resultado de la simulación.
+- La fecha se calcula como fecha de desembolso + plazo máximo en meses.
+- El plazo máximo sigue limitado por edad máxima y por Cuotas máximas (meses).
+- Si el cliente no es otorgable por edad, no se muestra una fecha fin.
+- Se conserva la cuota, convenios, tasas, provisiones, boletas, deudas, accesos, logos y diseño responsive.
