@@ -273,7 +273,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v44-responsive">
-/* V48: el cronograma se calcula internamente; su detalle queda oculto. */
+/* V49: el cronograma se calcula internamente; su detalle queda oculto. */
 @media (max-width: 900px){
   body{overflow-x:hidden}
   .container,.page,.main-container{width:100%!important;max-width:100%!important}
@@ -311,6 +311,36 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 <style id="mca-v48-enddate">
 #fechaFinPrestamoHint{display:block;margin-top:5px;font-size:10px;color:#64748b}
 @media(max-width:640px){#fechaFinPrestamoResultado{font-size:16px}}
+</style>
+
+<style id="mca-v49-navigation">
+.cron-view-hidden{display:none!important}
+.mca-nav{
+  display:flex;justify-content:flex-end;gap:10px;align-items:center;
+  margin:0 0 14px 0;
+}
+.mca-nav button{
+  border:0;border-radius:10px;padding:11px 18px;font-weight:800;
+  cursor:pointer;font-size:13px;transition:.15s;
+}
+.mca-next{
+  background:#072f5f;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.12);
+}
+.mca-next:hover{transform:translateY(-1px);background:#0b3e78}
+.mca-back{
+  background:#fff;color:#072f5f;border:1px solid #b8cbe0!important;
+}
+.mca-back:hover{background:#edf5fc}
+.cron-page-head{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;margin-bottom:12px;
+}
+.cron-page-head h2{margin:0}
+.cron-page-actions{display:flex;gap:10px}
+@media(max-width:640px){
+  .mca-nav,.cron-page-head{flex-direction:column;align-items:stretch}
+  .mca-nav button,.cron-page-actions button{width:100%}
+}
 </style>
 </head>
 <body>
@@ -417,18 +447,27 @@ esultado calculado automáticamente según RCI, facultativos y provisión del co
 <button type="button" id="addDebtBtn" class="add-debt-btn">+ Agregar deuda</button>
 </div>
 
-</div></div></div></div></div></main>
+</div></div></div></div></div>
+<div class="mca-nav">
+  <button type="button" class="mca-next" id="goCronogramaBtn">
+    SIGUIENTE: VER CRONOGRAMA →
+  </button>
+</div>
+</main>
 
-<section class="cronograma-section" style="display:none!important">
+<section class="cronograma-section cron-view-hidden" id="cronogramaView">
   <div class="card">
-    <div class="cron-head">
-      <div>
-        <h2>5. Cronograma de simulación</h2>
-        <p class="cron-sub">Modelo de cronograma preliminar: fecha de desembolso + corte + vencimiento + periodo de gracia + interés diario + seguro sobre saldo insoluto.</p>
-      </div>
-      <div class="cron-badge" id="cronStatus">Esperando simulación</div>
-    </div>
-    <div class="cron-summary">
+    
+<div class="cron-page-head">
+  <div>
+    <h2>5. Cronograma de simulación</h2>
+    <p class="cron-sub">Detalle de pagos generado con los datos de la simulación.</p>
+  </div>
+  <div class="cron-page-actions">
+    <button type="button" class="mca-back" id="backCalculadoraBtn">← VOLVER A CALCULADORA</button>
+  </div>
+</div>
+<div class="cron-summary">
       <div><span>Fecha desembolso</span><strong id="cronDesembolso">—</strong></div>
       <div><span>Días de gracia calculados</span><strong id="cronDiasGracia">0 días</strong></div>
       <div><span>Monto principal solicitado</span><strong id="cronMonto">S/ 0.00</strong></div>
@@ -915,7 +954,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-   MODELO V48 — réplica del cronograma mostrado por el usuario.
+   MODELO V49 — réplica del cronograma mostrado por el usuario.
 
    1. Fecha de desembolso + corte + vencimiento determinan el primer periodo
       de gracia.
@@ -1391,4 +1430,37 @@ document.addEventListener("change",function(e){
     setTimeout(actualizarPlazoMaximo,50);
   }
 });
-window.addEventListener("load",()=>setTimeout(actualizarPlazoMaximo,100));</script>
+window.addEventListener("load",()=>setTimeout(actualizarPlazoMaximo,100));
+(function(){
+  const mainView=document.querySelector("main");
+  const cronView=document.getElementById("cronogramaView");
+  const nextBtn=document.getElementById("goCronogramaBtn");
+  const backBtn=document.getElementById("backCalculadoraBtn");
+
+  function mostrarCronograma(){
+    try{
+      if(typeof calc==="function") calc();
+    }catch(e){
+      console.warn("MCA: error al actualizar antes de mostrar cronograma",e);
+    }
+    if(!cronView||!mainView)return;
+    mainView.style.display="none";
+    cronView.classList.remove("cron-view-hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function volverCalculadora(){
+    if(!cronView||!mainView)return;
+    cronView.classList.add("cron-view-hidden");
+    mainView.style.display="";
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  if(nextBtn)nextBtn.addEventListener("click",mostrarCronograma);
+  if(backBtn)backBtn.addEventListener("click",volverCalculadora);
+
+  // Keep the view consistent if the page is refreshed.
+  window.mcaMostrarCronograma=mostrarCronograma;
+  window.mcaVolverCalculadora=volverCalculadora;
+})();
+</script>

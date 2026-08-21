@@ -1,9 +1,14 @@
-# MCA CALCULADORA V48
+# MCA CALCULADORA V49 — CALCULADORA + HOJA DE CRONOGRAMA
 
-Cambios:
-- Mantiene el cálculo del plazo máximo de V47.
-- Añade `FECHA FIN DEL PRÉSTAMO` en Resultado de la simulación.
-- La fecha se calcula como fecha de desembolso + plazo máximo en meses.
-- El plazo máximo sigue limitado por edad máxima y por Cuotas máximas (meses).
-- Si el cliente no es otorgable por edad, no se muestra una fecha fin.
-- Se conserva la cuota, convenios, tasas, provisiones, boletas, deudas, accesos, logos y diseño responsive.
+Se incorpora navegación en dos vistas dentro de la misma página GitHub Pages:
+
+1. Vista principal: MCA CALCULADORA.
+2. Vista siguiente: CRONOGRAMA DE SIMULACIÓN.
+
+Botones:
+- `SIGUIENTE: VER CRONOGRAMA →` para pasar a la segunda vista.
+- `← VOLVER A CALCULADORA` para regresar.
+
+El cronograma no se elimina ni se recalcula con otro motor: utiliza el mismo motor de cronograma ya calibrado en la versión anterior, incluyendo fecha de desembolso, corte, vencimiento, periodo de gracia, TEA, seguro, interés, amortización, cuota y total a pagar.
+
+También se incluye `logo-mca.png`, que era referenciado por el encabezado y no estaba dentro del paquete anterior.
