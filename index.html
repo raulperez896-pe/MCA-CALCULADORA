@@ -273,7 +273,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v44-responsive">
-/* V53: el cronograma se calcula internamente; su detalle queda oculto. */
+/* V54: el cronograma se calcula internamente; su detalle queda oculto. */
 @media (max-width: 900px){
   body{overflow-x:hidden}
   .container,.page,.main-container{width:100%!important;max-width:100%!important}
@@ -364,7 +364,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 @media(max-width:900px){.cron-table-wrap{max-height:60vh;min-height:260px}.cron-base-notes{font-size:10px}}
 </style>
 <style id="mca-v52-excel-cron">
-/* V53 — visual de la hoja Cronograma de la calculadora base */
+/* V54 — visual de la hoja Cronograma de la calculadora base */
 #cronogramaView{
   font-family:Roboto,Arial,sans-serif!important;
   color:#202428;
@@ -1400,7 +1400,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-    MOTOR V53 — replica la hoja "Cronograma" de la calculadora base.
+    MOTOR V54 — replica la hoja "Cronograma" de la calculadora base.
 
     TED = (1 + TEA)^(1/360) - 1
 
@@ -1517,23 +1517,34 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   // TCEA de referencia usando la tasa diaria efectiva.
   const tcea=Math.pow(1+ted, (plazo+graceN)*30)-1;
 
-  $("cronDesembolso").textContent=fmtDate(d0);
-  $("cronDiasGracia").textContent=daysGrace+" días";
-  $("cronMonto").textContent=money2(monto);
-  $("cronTasa").textContent=pct(tea);
-  $("cronPlazo").textContent=plazo+" meses";
-  $("cronCorte").textContent=cutN?String(cutN):"—";
-  $("cronPago").textContent=payN?String(payN):"—";
-  $("cronGracia").textContent=graceN+" meses";
-  $("cronSeguro").textContent=seguro||"—";
-  $("cronSeguroPct").textContent=pct(insuranceRate);
-  $("cronCuota").textContent=money2(firstTotalCuota);
-  $("cronCuotaTotal").textContent=money2(cuotaConstante);
-  if($("cronTcea"))$("cronTcea").textContent=pct(tcea);
-  if($("cronPrincipal"))$("cronPrincipal").textContent=money2(capitalInicial);
-  if($("cronSeguroImporte"))$("cronSeguroImporte").textContent=money2(firstInsurance);
-  if($("cronPrimerVencimiento"))$("cronPrimerVencimiento").textContent=fmtDate(firstDue);
-  if($("cronStatus"))$("cronStatus").textContent="Cronograma actualizado";
+  // La V54 cambió los IDs visuales de la hoja. Escribimos en los
+  // campos nuevos y, si existen, también en los IDs antiguos.
+  const cronSet=(ids,v)=>{
+    (Array.isArray(ids)?ids:[ids]).forEach(id=>{
+      const el=$(id);
+      if(el) el.textContent=v;
+    });
+  };
+  cronSet(["cronDesembolso","cronDesembolso2"],fmtDate(d0));
+  cronSet(["cronDiasGracia"],daysGrace+" días");
+  cronSet(["cronMonto","cronMonto2"],money2(monto));
+  cronSet(["cronTasa","cronTasa2"],pct(tea));
+  cronSet(["cronPlazo"],plazo+" meses");
+  cronSet(["cronCorte","cronCorte2"],cutN?String(cutN):"—");
+  cronSet(["cronPago","cronPago2"],payN?String(payN):"—");
+  cronSet(["cronGracia","cronGracia2"],graceN+" meses");
+  cronSet(["cronSeguro","cronSeguroNombre"],seguro||"—");
+  cronSet(["cronSeguroPct","cronSeguroPct2"],pct(insuranceRate));
+  cronSet(["cronCuota"],money2(firstTotalCuota));
+  cronSet(["cronCuotaTotal"],money2(cuotaConstante));
+  cronSet(["cronTcea","cronTcea2"],pct(tcea));
+  cronSet(["cronPrincipal"],money2(capitalInicial));
+  cronSet(["cronSeguroImporte","cronSeguroImporte2"],money2(firstInsurance));
+  cronSet(["cronPrimerVencimiento","cronPrimer2"],fmtDate(firstDue));
+  cronSet(["cronStatus"],"Cronograma actualizado");
+
+  cronSet(["cronDuracionTotal"],(plazo+graceN)+" meses");
+  cronSet(["cronQmax2"],$("qmax")?.textContent||"S/ 0.00");
 
   if($("cronNote")){
     $("cronNote").textContent=
@@ -1804,6 +1815,8 @@ function calc(){
     window.mcaLastCron=null;
   }
   const cuota=(cron?.totalFirst ?? window.mcaLastCron?.totalFirst ?? 0);
+  // Cuota nueva = Total a pagar constante de la primera cuota del cronograma.
+  if(cron) window.mcaLastCron=cron;
   setMoney("cuota",cuota);
   const deudas=totalOtherBankQuotas();
   const globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley-facult);
@@ -1998,9 +2011,25 @@ window.addEventListener("load",()=>setTimeout(actualizarPlazoMaximo,100));
       try{ calc(); }catch(e){ console.warn("MCA: error al actualizar cronograma",e); }
     }
     if(!cronView||!mainView)return;
-    syncCronSheetFields(current(), $("seguro")?.value||"");
     mainView.style.display="none";
     cronView.classList.remove("cron-view-hidden");
+    try{
+      const r=current();
+      const monto=num("monto");
+      const plazo=num("plazo");
+      const seguro=$("seguro")?.value||"";
+      const fecha=$("fechaDesembolso")?.value||"";
+      const b=$("buro")?.value||"";
+      const tea=r ? rateFrom(seguro==="Sin seguro"?r["Tasa Sin Seguro"]:r["Tasa Con Seguro"],b) : 0;
+      if(r && tea && monto && plazo){
+        const fresh=renderCronograma(r,monto,plazo,tea,seguro,fecha);
+        if(fresh) window.mcaLastCron=fresh;
+      }
+      if(r) syncCronSheetFields(r,seguro);
+      if(window.mcaLastCron?.totalFirst) setMoney("cuota",window.mcaLastCron.totalFirst);
+    }catch(e){
+      console.error("MCA: no se pudo generar el cronograma",e);
+    }
     window.scrollTo({top:0,behavior:"smooth"});
   }
 
