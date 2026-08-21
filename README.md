@@ -1,13 +1,32 @@
-# MCA CALCULADORA V23
+# MCA CALCULADORA V24
 
-## Autollenado de boletas
+## Lógica corregida de boletas
 
-Al ingresar el **Ingreso Variable** en Boleta 2 o Boleta 3, se copian automáticamente desde Boleta 1:
+### Caso 1: solo Boleta 1
+Si el usuario llena únicamente Boleta 1, la simulación utiliza únicamente los valores de Boleta 1.
+No divide los valores entre 3 ni considera Boleta 2/3 vacías como ceros.
+
+### Caso 2: Boleta 2
+Cuando se ingresa el Ingreso Variable de Boleta 2, se copian automáticamente desde Boleta 1:
 - Ingreso Fijo
 - No constante
 - Descuento de Ley
 - Facultativo
 
-El **Ingreso Variable** de Boleta 2 y Boleta 3 se mantiene independiente.
+El Ingreso Variable de Boleta 2 queda con el valor ingresado por el usuario.
 
-El autollenado se activa al escribir, cambiar o salir del campo de Ingreso Variable y después recalcula la tabla y la simulación.
+### Caso 3: Boleta 3
+Cuando se ingresa el Ingreso Variable de Boleta 3, se copian automáticamente desde Boleta 1:
+- Ingreso Fijo
+- No constante
+- Descuento de Ley
+- Facultativo
+
+El Ingreso Variable de Boleta 3 queda con el valor ingresado por el usuario.
+
+### Promedios
+- Solo B1 llena → promedio = B1.
+- B1 + B2 → promedio = (B1+B2)/2.
+- B1 + B2 + B3 → promedio = (B1+B2+B3)/3.
+
+La réplica se realiza mediante delegación de eventos para que funcione aunque la interfaz actualice/re-renderice los campos.
