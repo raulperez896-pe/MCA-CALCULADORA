@@ -1333,6 +1333,81 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   footer{display:block!important;font-size:6.5px!important;background:#fff!important;color:#555!important;border:0!important;padding:0!important;margin-top:3mm!important}
 }
 </style>
+
+<style id="mca-v68-three-column-final">
+/* V68: CRONOGRAMA - ESTRUCTURA DE 3 COLUMNAS. Se reemplaza la retícula de 4 columnas. */
+#cronogramaView .cron-data-grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
+  grid-auto-rows:minmax(34px,auto)!important;
+  column-gap:12px!important;
+  row-gap:7px!important;
+  align-items:start!important;
+}
+#cronogramaView .cron-field{min-width:0!important;grid-column:auto!important;grid-row:auto!important;}
+#cronogramaView .cron-field label{display:block!important;white-space:nowrap!important;overflow:visible!important;}
+#cronogramaView .sheet-value,#cronogramaView .sheet-input{width:100%!important;box-sizing:border-box!important;}
+
+/* 3 columnas, de arriba hacia abajo, sin cruces */
+#cronogramaView .convenio-field{grid-column:1!important;grid-row:1!important}
+#cronogramaView .special-field{grid-column:1!important;grid-row:2!important}
+#cronogramaView .cuotas-field{grid-column:1!important;grid-row:3!important}
+#cronogramaView .editable-field{grid-column:1!important;grid-row:4!important}
+#cronogramaView .dni-field{grid-column:1!important;grid-row:5!important}
+#cronogramaView .monto-field{grid-column:1!important;grid-row:6!important}
+#cronogramaView .tea-field{grid-column:1!important;grid-row:7!important}
+#cronogramaView .desembolso-field{grid-column:1!important;grid-row:8!important}
+#cronogramaView .primer-field{grid-column:1!important;grid-row:9!important}
+
+#cronogramaView .cargo-field{grid-column:2!important;grid-row:1!important}
+#cronogramaView .gracia-field{grid-column:2!important;grid-row:2!important}
+#cronogramaView .duration-field{grid-column:2!important;grid-row:3!important}
+#cronogramaView .insurance-field{grid-column:2!important;grid-row:4!important}
+#cronogramaView .seguro-importe-field{grid-column:2!important;grid-row:5!important}
+#cronogramaView .tcea-field{grid-column:2!important;grid-row:6!important}
+
+#cronogramaView .rates-field{grid-column:3!important;grid-row:1 / span 2!important}
+#cronogramaView .rates-sin-field{grid-column:3!important;grid-row:3 / span 2!important}
+#cronogramaView .solicitud-field{grid-column:3!important;grid-row:5!important}
+#cronogramaView .corte-field{grid-column:3!important;grid-row:6!important}
+#cronogramaView .pago-field{grid-column:3!important;grid-row:7!important}
+#cronogramaView .qmax-field{grid-column:3!important;grid-row:8!important}
+
+@media print{
+  #cronogramaView .cron-data-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
+    grid-template-rows:repeat(9,auto)!important;
+    column-gap:7px!important;
+    row-gap:2px!important;
+    align-items:start!important;
+  }
+  #cronogramaView .cron-field{min-width:0!important;grid-column:auto!important;grid-row:auto!important;overflow:visible!important}
+  #cronogramaView .cron-field label{white-space:nowrap!important;overflow:visible!important;font-size:7px!important}
+  #cronogramaView .sheet-value,#cronogramaView .sheet-input{width:100%!important}
+  #cronogramaView .convenio-field{grid-column:1!important;grid-row:1!important}
+  #cronogramaView .special-field{grid-column:1!important;grid-row:2!important}
+  #cronogramaView .cuotas-field{grid-column:1!important;grid-row:3!important}
+  #cronogramaView .editable-field{grid-column:1!important;grid-row:4!important}
+  #cronogramaView .dni-field{grid-column:1!important;grid-row:5!important}
+  #cronogramaView .monto-field{grid-column:1!important;grid-row:6!important}
+  #cronogramaView .tea-field{grid-column:1!important;grid-row:7!important}
+  #cronogramaView .desembolso-field{grid-column:1!important;grid-row:8!important}
+  #cronogramaView .primer-field{grid-column:1!important;grid-row:9!important}
+  #cronogramaView .cargo-field{grid-column:2!important;grid-row:1!important}
+  #cronogramaView .gracia-field{grid-column:2!important;grid-row:2!important}
+  #cronogramaView .duration-field{grid-column:2!important;grid-row:3!important}
+  #cronogramaView .insurance-field{grid-column:2!important;grid-row:4!important}
+  #cronogramaView .seguro-importe-field{grid-column:2!important;grid-row:5!important}
+  #cronogramaView .tcea-field{grid-column:2!important;grid-row:6!important}
+  #cronogramaView .rates-field{grid-column:3!important;grid-row:1 / span 2!important}
+  #cronogramaView .rates-sin-field{grid-column:3!important;grid-row:3 / span 2!important}
+  #cronogramaView .solicitud-field{grid-column:3!important;grid-row:5!important}
+  #cronogramaView .corte-field{grid-column:3!important;grid-row:6!important}
+  #cronogramaView .pago-field{grid-column:3!important;grid-row:7!important}
+  #cronogramaView .qmax-field{grid-column:3!important;grid-row:8!important}
+}
+</style>
 </head>
 <body>
 <header><div class="head">
@@ -2798,5 +2873,25 @@ window.addEventListener("load",()=>setTimeout(actualizarPlazoMaximo,100));
   #cronogramaView .cron-notes p{margin:0 0 2.5px!important}
   #cronogramaView .cron-signature{margin:34px 0 0 5px!important;width:180px!important;font-size:8px!important}
   #cronogramaView .cron-signature br{line-height:1!important}
+}
+</style>
+
+<style id="mca-v69-final-position-fix">
+/* V69 - ajuste final de posiciones solicitado: 3 columnas.
+   Modalidad/cargo encabeza la columna 3 y Periodo de gracia queda en columna 2,
+   alineado horizontalmente con Número de cuotas permitidas de la columna 1. */
+#cronogramaView .cron-data-grid{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
+}
+
+#cronogramaView .cargo-field{grid-column:3!important;grid-row:1!important}
+#cronogramaView .gracia-field{grid-column:2!important;grid-row:3!important}
+
+@media print{
+  #cronogramaView .cron-data-grid{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
+  }
+  #cronogramaView .cargo-field{grid-column:3!important;grid-row:1!important}
+  #cronogramaView .gracia-field{grid-column:2!important;grid-row:3!important}
 }
 </style>
