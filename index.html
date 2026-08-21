@@ -1062,6 +1062,82 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 }
 </style>
 
+
+<style id="mca-v65-prueba0-order">
+@media print{
+  @page{size:A4 portrait;margin:10mm 9mm 9mm 9mm}
+  html,body{margin:0!important;padding:0!important;background:#fff!important;overflow:visible!important}
+  body>*:not(#cronogramaView):not(footer){display:none!important}
+  #cronogramaView{display:block!important;position:static!important;width:100%!important;margin:0!important;padding:0!important;background:#fff!important}
+  #cronogramaView .cron-sheet{width:100%!important;max-width:none!important;margin:0!important;padding:3mm 3mm 3.5mm!important;border:1px solid #999!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;box-sizing:border-box!important;overflow:visible!important}
+  #cronogramaView .cron-sheet-toolbar{display:none!important}
+  #cronogramaView .cron-sheet-header{height:auto!important;margin:0 0 3px!important}
+  #cronogramaView .sheet-brand{display:none!important}
+  #cronogramaView .sheet-title{font-family:Arial,Helvetica,sans-serif!important;color:#001391!important;font-size:9.5px!important;line-height:1.05!important;font-weight:700!important;text-decoration:underline!important;margin:0!important}
+
+  /* PRUEBA 0: 4 columnas, misma secuencia y sin cruces */
+  #cronogramaView .cron-data-grid{
+    display:grid!important;
+    grid-template-columns:1fr 1fr 1fr 1fr!important;
+    grid-template-rows:29px 29px 29px 29px 29px 29px!important;
+    column-gap:6px!important;
+    row-gap:2px!important;
+    margin:0!important;
+    align-items:start!important;
+  }
+  #cronogramaView .cron-field{min-width:0!important;min-height:0!important;height:auto!important;overflow:visible!important}
+  #cronogramaView .cron-field label{display:block!important;margin:0 0 1px 1px!important;font-family:Arial,Helvetica,sans-serif!important;color:#111!important;font-size:6.8px!important;line-height:1.05!important;font-weight:700!important}
+  #cronogramaView .sheet-value,#cronogramaView .sheet-input{box-sizing:border-box!important;width:100%!important;min-height:15px!important;height:15px!important;padding:1px 3px!important;border:1px solid #c4ccd5!important;border-radius:0!important;background:#edf0f2!important;color:#333!important;font-family:Arial,Helvetica,sans-serif!important;font-size:6.8px!important;line-height:1.05!important}
+  #cronogramaView .multiline{height:27px!important;min-height:27px!important;white-space:pre-line!important;line-height:1.05!important}
+  #cronogramaView .inline-values{display:grid!important;grid-template-columns:1fr 1.25fr!important;gap:0!important}
+  #cronogramaView .inline-values .sheet-value{height:15px!important;min-height:15px!important}
+
+  /* Orden exacto de PRUEBA 0 */
+  #cronogramaView .convenio-field{grid-column:1;grid-row:1}
+  #cronogramaView .cargo-field{grid-column:2;grid-row:1}
+  #cronogramaView .rates-field{grid-column:3;grid-row:1 / span 2}
+  #cronogramaView .special-field{grid-column:4;grid-row:1}
+
+  #cronogramaView .cuotas-field{grid-column:1;grid-row:2}
+  #cronogramaView .rates-sin-field{grid-column:2;grid-row:2 / span 2}
+  #cronogramaView .editable-field{grid-column:3;grid-row:2}
+  #cronogramaView .gracia-field{grid-column:4;grid-row:2}
+
+  #cronogramaView .insurance-field{grid-column:1;grid-row:3}
+  #cronogramaView .dni-field{grid-column:2;grid-row:3}
+  #cronogramaView .duration-field{grid-column:3;grid-row:3}
+  #cronogramaView .seguro-importe-field{grid-column:4;grid-row:3}
+
+  #cronogramaView .corte-field{grid-column:1;grid-row:4}
+  #cronogramaView .monto-field{grid-column:2;grid-row:4}
+  #cronogramaView .tea-field{grid-column:3;grid-row:4}
+  #cronogramaView .pago-field{grid-column:4;grid-row:4}
+
+  #cronogramaView .primer-field{grid-column:1;grid-row:5}
+  #cronogramaView .tcea-field{grid-column:2;grid-row:5}
+  #cronogramaView .qmax-field{grid-column:4;grid-row:5}
+
+  #cronogramaView .desembolso-field{grid-column:1;grid-row:6}
+  #cronogramaView .solicitud-field{grid-column:4;grid-row:6}
+
+  #cronogramaView .cron-blue-title{margin:4px 0 2px!important;padding:3px 4px!important;height:auto!important;background:#001391!important;color:#fff!important;border-radius:0!important;font-family:Arial,Helvetica,sans-serif!important;font-size:9px!important;line-height:1!important;font-weight:700!important;text-align:center!important}
+  #cronogramaView .cron-table-wrap{width:100%!important;max-height:none!important;min-height:0!important;overflow:visible!important;border:0!important;margin:0!important}
+  #cronogramaView .cron-base-table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;font-family:Arial,Helvetica,sans-serif!important;font-size:6.2px!important;color:#111!important}
+  #cronogramaView .cron-base-table th{background:#f3f3f3!important;color:#111!important;border:1px solid #aaa!important;padding:2px 1px!important;font-size:6px!important;line-height:1!important;font-weight:700!important;text-align:center!important;white-space:normal!important}
+  #cronogramaView .cron-base-table td{border:0!important;padding:1px 2px!important;font-size:6px!important;line-height:1.02!important;color:#111!important;background:#fff!important;white-space:nowrap!important;text-align:right!important}
+  #cronogramaView .cron-base-table td:first-child,#cronogramaView .cron-base-table td:nth-child(2){text-align:center!important}
+  #cronogramaView .cron-base-table tr.grace-row td{background:#fffaf0!important}
+  #cronogramaView .cron-ellipsis-row td{height:7px!important;padding:0!important;font-size:6px!important;line-height:1!important}
+  #cronogramaView .cron-last-summary-row td{font-weight:700!important}
+  #cronogramaView .cron-last-summary-row td:first-child{background:#f7d99f!important}
+  #cronogramaView .cron-total-row td{border-top:1px solid #777!important;font-weight:700!important;background:#fff!important}
+  #cronogramaView .cron-notes{margin:10px 3px 0!important;padding:0!important;min-height:0!important;color:#111!important;font-family:Arial,Helvetica,sans-serif!important;font-size:6px!important;line-height:1.12!important}
+  #cronogramaView .cron-notes p{margin:0 0 3px!important}
+  #cronogramaView .cron-signature{margin:38px 0 0 12px!important;width:150px!important;text-align:center!important;color:#111!important;font-size:7px!important}
+  #cronogramaView .cron-signature:before{display:block!important;content:""!important;border-top:1px solid #222!important;margin-bottom:2px!important}
+  footer{display:block!important;font-size:6px!important;background:#fff!important;color:#555!important;border:0!important;padding:0!important;margin-top:2mm!important}
+}
+</style>
 </head>
 <body>
 <header><div class="head">
