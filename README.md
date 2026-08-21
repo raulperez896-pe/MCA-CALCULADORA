@@ -1,7 +1,14 @@
-# MCA CALCULADORA V35
+# MCA CALCULADORA V36
 
-Ajuste visual:
-- Parámetros del convenio queda debajo de Resultado de la simulación.
-- El bloque de Parámetros se amplía verticalmente para ocupar el espacio correspondiente a la suma visual de las secciones 2 y 3 del lado izquierdo.
-- Datos financieros mantiene el ancho completo de la columna izquierda.
-- En pantallas pequeñas el diseño vuelve a una sola columna.
+Corrección de precisión del endeudamiento global.
+
+La fórmula ahora utiliza el mismo ingreso neto que muestra la calculadora:
+Ingreso fijo + variable convertido + no constante + adicional - descuento de ley - facultativo.
+
+Por ejemplo:
+Ingreso neto = S/ 3,200
+Deudas = S/ 650
+Endeudamiento = 650 / 3200 = 20.3125% → 20.31%
+
+Antes el cálculo excluía el facultativo del denominador:
+650 / 3250 = 20.00%, generando la diferencia observada.

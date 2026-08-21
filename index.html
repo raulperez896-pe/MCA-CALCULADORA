@@ -731,10 +731,10 @@ function calc(){
   const cuotaMaxima=Math.max(0,baseRCI*rci-facult-provision);
   const cuota=tea?monto*factor(tea,plazo):0;
   const deudas=totalOtherBankQuotas();
-  const globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley);
+  const globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley-facult);
   const limite=edad>60?parsePct(r["Endeudamiento máximo \n(+ 60 años)"]):parsePct(r["Endeudamiento máximo \n(- 60 años)"]);
   const obligacionesFinales=Math.max(0,deudas+cuota);
-  const end=globalBase?obligacionesFinales/globalBase:0;
+  const end=globalBase?obligacionesFinales/globalBase:0; // Endeudamiento = (cuotas actuales + cuota nueva) / ingreso neto global
   const maxAge=Number(r["Edad máxima al finalizar el crédito (Años)"])||999,ageEnd=edad+plazo/12,alerts=[];
   if(!b)alerts.push("Selecciona el buró para aplicar la tasa correcta.");
   else if(!allowed(r["Buró"],b))alerts.push("El buró "+b+" no está permitido para este perfil ("+(r["Buró"]||"no informado")+")");
