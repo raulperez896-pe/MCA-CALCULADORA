@@ -1,9 +1,16 @@
-# MCA CALCULADORA V56
+# MCA Calculadora V59 – GitHub Pages
 
-Cambios:
-- Cronograma muestra la fila de gracia, las 12 primeras cuotas, una fila de resumen de la última cuota y Totales.
-- La última cuota usa los valores reales calculados, no una estimación.
-- La primera cuota incluye siempre Total a Pagar = Total Cuota + Seguro.
-- TCEA referencial queda calculada automáticamente con TEA/12 + seguro mensual.
-- Primer vencimiento se calcula y se refleja en la ficha superior.
-- Se mantiene la lógica completa de generación de todas las cuotas internamente.
+Versión integrada de MCA Calculadora.
+
+## Cambios V59
+- Cronograma reordenado según la hoja base.
+- Cargo especial debajo de Convenio.
+- Número de cuotas permitidas debajo de Cargo especial.
+- DNI debajo del Nombre del cliente.
+- TCEA Referencial debajo de Importe Seguro Desgrav.
+- Primer vencimiento debajo de Día de vencimiento.
+- Cuota máxima debajo de Primer vencimiento.
+- Sin duplicar DNI, monto principal ni fecha de desembolso.
+
+## Publicación en GitHub Pages
+Subir todos los archivos de esta carpeta al repositorio, manteniendo `index.html` en la raíz. Luego activar GitHub Pages desde Settings > Pages usando la rama que contiene estos archivos.

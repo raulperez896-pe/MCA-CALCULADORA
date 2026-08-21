@@ -730,55 +730,31 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   align-items:start;
 }
 #cronogramaView .cron-field{min-height:34px}
-#cronogramaView .cron-field label{
-  font-size:12px;
-  margin:0 0 3px 2px;
-}
-#cronogramaView .sheet-value,
-#cronogramaView .sheet-input{
-  min-height:24px;
-  font-size:12px;
-  padding:4px 6px;
-  border-radius:0;
-  text-align:left;
-}
+#cronogramaView .cron-field label{font-size:12px;margin:0 0 3px 2px}
+#cronogramaView .sheet-value,#cronogramaView .sheet-input{min-height:24px;font-size:12px;padding:4px 6px;border-radius:0;text-align:left}
 #cronogramaView .convenio-field{grid-column:1;grid-row:1}
-#cronogramaView .cargo-field{grid-column:2 / span 2;grid-row:1}
-#cronogramaView .special-field{grid-column:1 / span 3;grid-row:2}
-#cronogramaView .rates-field{grid-column:4;grid-row:1 / span 3}
-#cronogramaView .cuotas-field{grid-column:1;grid-row:3}
+#cronogramaView .cargo-field{grid-column:2;grid-row:1}
+#cronogramaView .rates-field{grid-column:4;grid-row:1 / span 2}
+#cronogramaView .special-field{grid-column:1;grid-row:2}
+#cronogramaView .cuotas-field{grid-column:2;grid-row:2}
+#cronogramaView .rates-sin-field{grid-column:4;grid-row:3 / span 2}
+#cronogramaView .editable-field{grid-column:1;grid-row:3}
 #cronogramaView .gracia-field{grid-column:2;grid-row:3}
-#cronogramaView .editable-field{grid-column:1;grid-row:4}
+#cronogramaView .insurance-field{grid-column:3;grid-row:3}
+#cronogramaView .solicitud-field{grid-column:4;grid-row:5}
+#cronogramaView .dni-field{grid-column:1;grid-row:4}
 #cronogramaView .duration-field{grid-column:2;grid-row:4}
-#cronogramaView .cron-field:nth-of-type(8){grid-column:3;grid-row:4}
-#cronogramaView .cron-field:nth-of-type(9){grid-column:1;grid-row:5}
-#cronogramaView .insurance-field{grid-column:2;grid-row:5}
-#cronogramaView .cron-field:nth-of-type(11){grid-column:3;grid-row:5}
-#cronogramaView .cron-field:nth-of-type(12){grid-column:1;grid-row:6}
-#cronogramaView .cron-field:nth-of-type(13){grid-column:2;grid-row:6}
-#cronogramaView .cron-field:nth-of-type(14){grid-column:3;grid-row:6}
-#cronogramaView .cron-field:nth-of-type(15){grid-column:1;grid-row:7}
-#cronogramaView .cron-field:nth-of-type(16){grid-column:2;grid-row:7}
-#cronogramaView .cron-field:nth-of-type(17){grid-column:3;grid-row:7}
-#cronogramaView .cron-field:nth-of-type(18){grid-column:1;grid-row:8}
-#cronogramaView .cron-field:nth-of-type(19){grid-column:2;grid-row:8}
-#cronogramaView .cron-field:nth-of-type(20){grid-column:3;grid-row:8}
-#cronogramaView .cron-blue-title{
-  margin-top:8px;
-  font-size:18px;
-  padding:6px 8px;
-}
-#cronogramaView .cron-base-table{
-  min-width:0;
-  width:100%;
-  font-size:11px;
-}
-#cronogramaView .cron-base-table th{
-  height:40px;
-}
-#cronogramaView .cron-base-table td{
-  height:20px;
-}
+#cronogramaView .seguro-importe-field{grid-column:3;grid-row:4}
+#cronogramaView .corte-field{grid-column:4;grid-row:6}
+#cronogramaView .monto-field{grid-column:1;grid-row:5}
+#cronogramaView .tea-field{grid-column:2;grid-row:5}
+#cronogramaView .tcea-field{grid-column:3;grid-row:5}
+#cronogramaView .pago-field{grid-column:4;grid-row:7}
+#cronogramaView .desembolso-field{grid-column:1;grid-row:6}
+#cronogramaView .primer-field{grid-column:4;grid-row:8}
+#cronogramaView .qmax-field{grid-column:4;grid-row:9}
+#cronogramaView .second-rate-label{display:none}
+
 @media(max-width:850px){
   #cronogramaView .cron-data-grid{grid-template-columns:1fr 1fr}
   #cronogramaView .rates-field,
@@ -931,64 +907,70 @@ esultado calculado automáticamente según RCI, facultativos y provisión del co
       <div class="cron-field cargo-field">
         <label>Modalidad/cargo</label><div id="cronCargo" class="sheet-value">—</div>
       </div>
-      <div class="cron-field special-field">
-        <label>Cargo especial</label><div id="cronEspecial" class="sheet-value">—</div>
-      </div>
       <div class="cron-field rates-field">
         <label>Tasa con seguro</label><div id="cronTasaConSeguro" class="sheet-value multiline">—</div>
-        <label class="second-rate-label">Tasa sin seguro</label><div id="cronTasaSinSeguro" class="sheet-value multiline">—</div>
+      </div>
+
+      <div class="cron-field special-field">
+        <label>Cargo especial</label><div id="cronEspecial" class="sheet-value">—</div>
       </div>
       <div class="cron-field cuotas-field">
         <label>Número de cuotas permitidas</label><div id="cronCuotasPermitidas" class="sheet-value">—</div>
       </div>
-      <div class="cron-field gracia-field">
-        <label>Periodo de gracia</label><div id="cronGracia2" class="sheet-value">—</div>
+      <div class="cron-field rates-sin-field">
+        <label>Tasa sin seguro</label><div id="cronTasaSinSeguro" class="sheet-value multiline">—</div>
       </div>
 
       <div class="cron-field editable-field">
         <label>Nombre del cliente:</label>
         <input id="cronCliente" class="sheet-input" type="text" placeholder="Ingrese nombre">
       </div>
-      <div class="cron-field duration-field">
-        <label>Duración total (plazo + gracia):</label><div id="cronDuracionTotal" class="sheet-value orange-label">—</div>
-      </div>
-      <div class="cron-field">
-        <label>DNI del cliente:</label>
-        <input id="cronDni" class="sheet-input" type="text" inputmode="numeric" maxlength="12" placeholder="Ingrese DNI">
+      <div class="cron-field gracia-field">
+        <label>Periodo de gracia</label><div id="cronGracia2" class="sheet-value">—</div>
       </div>
       <div class="cron-field insurance-field">
         <label>Seg. Desgrav. (%)</label>
         <div class="inline-values"><div id="cronSeguroPct2" class="sheet-value small">—</div><div id="cronSeguroNombre" class="sheet-value">—</div></div>
       </div>
-      <div class="cron-field">
-        <label>Monto Principal Solicitado (S/.):</label><div id="cronMonto2" class="sheet-value">—</div>
-      </div>
-      <div class="cron-field">
-        <label>Importe Seguro Desgrav. (S/.):</label><div id="cronSeguroImporte2" class="sheet-value">—</div>
-      </div>
-      <div class="cron-field">
-        <label>Tasa Efectiva Anual (%):</label><div id="cronTasa2" class="sheet-value">—</div>
-      </div>
-      <div class="cron-field">
-        <label>TCEA Referencial (%):</label><div id="cronTcea2" class="sheet-value">—</div>
-      </div>
-      <div class="cron-field">
-        <label>Fecha de desembolso:</label><div id="cronDesembolso2" class="sheet-value">—</div>
-      </div>
-      <div class="cron-field">
+      <div class="cron-field solicitud-field">
         <label>Fecha de solicitud:</label>
         <input id="cronSolicitud" class="sheet-input" type="date">
       </div>
-      <div class="cron-field">
+
+      <div class="cron-field dni-field">
+        <label>DNI del cliente:</label>
+        <input id="cronDni" class="sheet-input" type="text" inputmode="numeric" maxlength="12" placeholder="Ingrese DNI">
+      </div>
+      <div class="cron-field duration-field">
+        <label>Duración total (plazo + gracia):</label><div id="cronDuracionTotal" class="sheet-value orange-label">—</div>
+      </div>
+      <div class="cron-field seguro-importe-field">
+        <label>Importe Seguro Desgrav. (S/.):</label><div id="cronSeguroImporte2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field corte-field">
         <label>Fecha de corte (día):</label><div id="cronCorte2" class="sheet-value">—</div>
       </div>
-      <div class="cron-field">
+
+      <div class="cron-field monto-field">
+        <label>Monto Principal Solicitado (S/.):</label><div id="cronMonto2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field tea-field">
+        <label>Tasa Efectiva Anual (%):</label><div id="cronTasa2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field tcea-field">
+        <label>TCEA Referencial (%):</label><div id="cronTcea2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field pago-field">
         <label>Día de vencimiento (día):</label><div id="cronPago2" class="sheet-value">—</div>
       </div>
-      <div class="cron-field">
+
+      <div class="cron-field desembolso-field">
+        <label>Fecha de desembolso:</label><div id="cronDesembolso2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field primer-field">
         <label>Primer vencimiento:</label><div id="cronPrimer2" class="sheet-value">—</div>
       </div>
-      <div class="cron-field">
+      <div class="cron-field qmax-field">
         <label>Cuota máxima (S/.):</label><div id="cronQmax2" class="sheet-value">—</div>
       </div>
     </div>
