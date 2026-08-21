@@ -273,7 +273,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v44-responsive">
-/* V49: el cronograma se calcula internamente; su detalle queda oculto. */
+/* V51: el cronograma se calcula internamente; su detalle queda oculto. */
 @media (max-width: 900px){
   body{overflow-x:hidden}
   .container,.page,.main-container{width:100%!important;max-width:100%!important}
@@ -342,7 +342,27 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   .mca-nav button,.cron-page-actions button{width:100%}
 }
 </style>
-</head>
+
+<style id="mca-v50-cron-base">
+.cron-base-table{min-width:820px}
+.cron-base-table th:first-child,.cron-base-table th:nth-child(2){text-align:center}
+.cron-base-table td:first-child,.cron-base-table td:nth-child(2){text-align:center}
+.cron-table-wrap{max-height:calc(100vh - 365px);min-height:260px;overflow:auto}
+@media(max-width:900px){.cron-table-wrap{max-height:60vh;min-height:240px}}
+</style>
+<style id="mca-v51-cron-base">
+.cron-base-table{width:100%;min-width:900px;border-collapse:collapse;table-layout:fixed;font-size:11px;color:#111827}
+.cron-base-table th{background:#f2f2f2;border:1px solid #aeb7c2;color:#111;font-weight:700;text-align:center!important;padding:5px 4px;line-height:1.05;white-space:normal}
+.cron-base-table td{border-bottom:0;padding:3px 5px;white-space:nowrap;text-align:right;line-height:1.15;font-size:11px}
+.cron-base-table td:first-child,.cron-base-table td:nth-child(2){text-align:center}
+.cron-base-table tr.grace-row td{background:#fffaf0}
+.cron-base-table .cron-total-row td{border-top:1px solid #8d8d8d;font-weight:800;background:#fff}
+.cron-table-wrap{max-height:calc(100vh - 365px);min-height:300px;overflow:auto;border:1px solid #c9c9c9;border-radius:0}
+.cron-base-notes{margin-top:20px;color:#111;font-size:11px;line-height:1.18}
+.cron-base-notes p{margin:0 0 6px}
+.cron-signature{margin:34px 0 8px 48px;text-align:center;width:210px;line-height:1.15}
+@media(max-width:900px){.cron-table-wrap{max-height:60vh;min-height:260px}.cron-base-notes{font-size:10px}}
+</style></head>
 <body>
 <header><div class="head">
 <div class="brand"><div class="logo-zone mca-zone"><img src="logo-mca.png" alt="Master Center Américas"></div><div><div class="title"><img src="logo-calculadora.png" alt="Master Calculadora" class="calculator-logo"></div><div class="sub">Calculadora de Créditos por Convenio</div></div></div>
@@ -425,7 +445,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   <strong id="fechaFinPrestamoResultado">—</strong>
   <small id="fechaFinPrestamoHint">Último vencimiento según el plazo máximo</small>
 </div>
-<div id="status" class="status neutral">Selecciona convenio, cargo y condición</div><div id="alerts"></div>
+<div id="alerts"></div>
 esultado calculado automáticamente según RCI, facultativos y provisión del convenio.</small></div>
 <div class="card"><h2>Parámetros del convenio</h2><div id="params" class="paramgrid"></div><div id="anti" class="info" style="margin-top:9px">Selecciona un perfil.</div></div>
 
@@ -461,7 +481,7 @@ esultado calculado automáticamente según RCI, facultativos y provisión del co
 <div class="cron-page-head">
   <div>
     <h2>5. Cronograma de simulación</h2>
-    <p class="cron-sub">Detalle de pagos generado con los datos de la simulación.</p>
+    <p class="cron-sub">CRONOGRAMA DE PAGO PRELIMINAR “PRÉSTAMO POR CONVENIO”</p>
   </div>
   <div class="cron-page-actions">
     <button type="button" class="mca-back" id="backCalculadoraBtn">← VOLVER A CALCULADORA</button>
@@ -486,15 +506,24 @@ esultado calculado automáticamente según RCI, facultativos y provisión del co
     </div>
     <div class="cron-note" id="cronNote">El cronograma se activa al completar convenio, cargo, condición, seguro, fecha de desembolso, monto y plazo.</div>
     <div class="cron-table-wrap">
-      <table class="cron-table">
+      <table class="cron-table cron-base-table">
         <thead>
           <tr>
-            <th>N° Cuota</th><th>Fecha Vencimiento</th><th>Saldo</th><th>Amortización</th>
-            <th>Interés</th><th>Comisiones o gastos</th><th>Total Cuota</th><th>Seguro desgrav.</th><th>Total a Pagar</th>
+            <th>Nro.<br>Cuota</th><th>Fecha de<br>Vencimiento</th><th>Saldo</th>
+            <th>Amortización</th><th>Interés</th><th>Comisiones o<br>gastos</th>
+            <th>Total<br>Cuota</th><th>Seguro<br>desgrav.</th><th>Total a<br>Pagar</th>
           </tr>
         </thead>
         <tbody id="cronBody"></tbody>
       </table>
+    </div>
+    <div class="cron-base-notes">
+      <p>- NO SE INCLUYEN LOS GASTOS DIRECTAMENTE PAGADOS POR EL CLIENTE</p>
+      <p>- EL MONTO DE AMORTIZACIÓN CON ESTE VALOR SE ORIGINA POR LA APLICACIÓN DEL CÁLCULO PARA LA OBTENCIÓN DE CUOTA CONSTANTE. NO AFECTA EL COSTO EFECTIVO ANUAL DEL CRÉDITO</p>
+      <p>- EL PRIMER VENCIMIENTO PODRÁ SER DESDE EL DÍA 15 Y HASTA UN MÁXIMO DE 30 DÍAS DE ACUERDO A LA MODALIDAD ELEGIDA POR EL CLIENTE EN LA SOLICITUD DEL PRÉSTAMO, LA FECHA DE CUOTA CONSTANTE Y LA FECHA DE CORTE DEL CRONOGRAMA</p>
+      <p>- USTED TIENE DERECHO A ELEGIR SU PROPIO SEGURO EN EL MOMENTO DE LA CONTRATACIÓN</p>
+      <p>- LAS OPERACIONES REALIZADAS EN LA CUENTA SE ENCUENTRAN AFECTAS AL PAGO DEL IMPUESTO POR TRANSACCIONES FINANCIERAS (ITF): 0.005%</p>
+      <div class="cron-signature">____________________________<br>FIRMA DEL CLIENTE</div>
     </div>
   </div>
 </section>
@@ -954,7 +983,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-   MODELO V49 — réplica del cronograma mostrado por el usuario.
+   MODELO V51 — réplica del cronograma mostrado por el usuario.
 
    1. Fecha de desembolso + corte + vencimiento determinan el primer periodo
       de gracia.
@@ -1064,8 +1093,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
     const vals=[
       "—",fmtDate(accrualStart),money2(monto),
       "("+money2(graceInterest).replace("S/ ","")+")",
-      money2(graceInterest),"S/ 0.00",money2(graceInterest),"S/ 0.00",
-      money2(graceInterest)
+      money2(graceInterest),"S/ 0.00",money2(graceInterest),"S/ 0.00",money2(graceInterest)
     ];
     vals.forEach(v=>{
       const td=document.createElement("td");
@@ -1088,15 +1116,9 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
 
     const tr=document.createElement("tr");
     const vals=[
-      i+1,
-      fmtDate(period.due),
-      money2(balance),
+      i+1,fmtDate(period.due),money2(balance),
       "("+money2(amort).replace("S/ ","")+")",
-      money2(interest),
-      "S/ 0.00",
-      money2(creditPayment),
-      money2(insurance),
-      money2(totalPayment)
+      money2(interest),"S/ 0.00",money2(creditPayment),money2(insurance),money2(totalPayment)
     ];
     vals.forEach(v=>{
       const td=document.createElement("td");
@@ -1106,6 +1128,23 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
     body.appendChild(tr);
     balance=final;
   }
+
+  // Totales de la simulación, igual que la hoja base.
+  let bt=financed, sumI=0, sumA=0, sumC=0, sumS=0, sumT=0;
+  for(const period of periods){
+    const interest=bt*(Math.pow(1+tea,period.days/360)-1);
+    const insurance=bt*insuranceRate*(period.days/30);
+    const amort=totalPayment-interest-insurance;
+    const creditPayment=interest+amort;
+    const final=Math.max(0,bt-amort);
+    sumI+=interest; sumA+=amort; sumC+=creditPayment; sumS+=insurance; sumT+=totalPayment;
+    bt=final;
+  }
+  const totalTr=document.createElement("tr");
+  totalTr.className="cron-total-row";
+  ["Totales","",money2(0),money2(sumA),money2(sumI),"S/ 0.00",money2(sumC),money2(sumS),money2(sumT)]
+    .forEach(v=>{const td=document.createElement("td");td.textContent=v;totalTr.appendChild(td);});
+  body.appendChild(totalTr);
 
   return {
     creditPayment:firstCreditPayment,
@@ -1258,7 +1297,8 @@ function calc(){
   const provision=parseMoney(r["Provisión"]);
   const cuotaMaxima=Math.max(0,baseRCI*rci-facult-provision);
   const cron=tea&&monto&&plazo ? renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso) : null;
-  const cuota=cron?.totalFirst||0;
+  if(cron) window.mcaLastCron=cron;
+  const cuota=(cron?.totalFirst ?? window.mcaLastCron?.totalFirst ?? 0);
   const deudas=totalOtherBankQuotas();
   const globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley-facult);
   const limite=edad>60?parsePct(r["Endeudamiento máximo \n(+ 60 años)"]):parsePct(r["Endeudamiento máximo \n(- 60 años)"]);
@@ -1275,7 +1315,13 @@ function calc(){
   const availableEnd=Math.max(0,limite*globalBase-deudas);
   const maxPay=Math.max(0,Math.min(cuotaMaxima,availableEnd));
   const suggested=tea&&plazo?maxPay/factor(tea,plazo):0;
-  setMoney("cuota",cuota);setMoney("qmax",cuotaMaxima);setMoney("sug",suggested); setMoney("neto",Math.max(0,fi+va+nc+ad-ley-facult));
+  setMoney("cuota",cuota);
+  // La cuota nueva es exactamente el "Total a pagar" de la primera cuota del cronograma.
+  if(window.mcaLastCron?.totalFirst && monto && plazo && tea){
+    setMoney("cuota",window.mcaLastCron.totalFirst);
+  }
+  setMoney("qmax",cuotaMaxima);setMoney("sug",suggested);
+  setMoney("neto",Math.max(0,fi+va+nc+ad-ley-facult));
   if($("rate"))$("rate").textContent=tea?pct(tea):"—";if($("end"))$("end").textContent=pct(end);
   setMoney("fp",fi);setMoney("vp",va);setMoney("ncp",nc);setMoney("adp",ad);setMoney("lp",ley);setMoney("fap",facult);
   if($("params"))$("params").innerHTML=[
@@ -1438,10 +1484,8 @@ window.addEventListener("load",()=>setTimeout(actualizarPlazoMaximo,100));
   const backBtn=document.getElementById("backCalculadoraBtn");
 
   function mostrarCronograma(){
-    try{
-      if(typeof calc==="function") calc();
-    }catch(e){
-      console.warn("MCA: error al actualizar antes de mostrar cronograma",e);
+    if(typeof calc==="function"){
+      try{ calc(); }catch(e){ console.warn("MCA: error al actualizar cronograma",e); }
     }
     if(!cronView||!mainView)return;
     mainView.style.display="none";
@@ -1453,6 +1497,13 @@ window.addEventListener("load",()=>setTimeout(actualizarPlazoMaximo,100));
     if(!cronView||!mainView)return;
     cronView.classList.add("cron-view-hidden");
     mainView.style.display="";
+    if(typeof calc==="function"){
+      try{ calc(); }catch(e){ console.warn("MCA: error al regresar a calculadora",e); }
+    }
+    if(window.mcaLastCron?.totalFirst){
+      const el=document.getElementById("cuota");
+      if(el) el.textContent=money(window.mcaLastCron.totalFirst);
+    }
     window.scrollTo({top:0,behavior:"smooth"});
   }
 
