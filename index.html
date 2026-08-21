@@ -141,6 +141,109 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   .financial-param-wrap{grid-template-columns:1fr}
   .financial-param-wrap>.card{min-height:0}
 }
+</style><style id="layout-v34">
+/* V34: Datos financieros ocupa todo el ancho de la columna izquierda.
+   Parámetros es un bloque independiente debajo de Resultado, con el mismo ancho. */
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);
+  gap:18px;
+  align-items:start;
+}
+.financial-full{
+  width:100%;
+  box-sizing:border-box;
+}
+.financial-full .scroll{
+  width:100%;
+  overflow-x:auto;
+}
+.financial-full table{
+  width:100%;
+  table-layout:fixed;
+}
+.financial-full table th:first-child,
+.financial-full table td:first-child{
+  width:28%;
+}
+.financial-full table th:not(:first-child),
+.financial-full table td:not(:first-child){
+  width:18%;
+}
+.financial-full td input{
+  width:100%;
+  box-sizing:border-box;
+}
+.layout>section:nth-of-type(2) > .card{
+  width:100%;
+  box-sizing:border-box;
+}
+.layout>section:nth-of-type(2) > .card + .card{
+  width:100%;
+  box-sizing:border-box;
+  margin-top:0;
+}
+@media(max-width:1000px){
+  .layout{grid-template-columns:1fr}
+}
+</style><style id="layout-v35">
+/* V35: Parámetros del convenio ocupa verticalmente el mismo espacio
+   que la suma de las secciones 2 y 3 del lado izquierdo. */
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);
+  gap:18px;
+  align-items:start;
+}
+.layout > section:first-child{
+  min-width:0;
+}
+.layout > section:nth-of-type(2){
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.layout > section:nth-of-type(2) > .card:first-child{
+  flex:0 0 auto;
+}
+.layout > section:nth-of-type(2) > .card:nth-child(2){
+  /*
+   Resultado ocupa la misma altura que la sección 1.
+   Parámetros queda debajo y se extiende hasta el final de las
+   secciones 2 + 3 del lado izquierdo.
+  */
+  min-height:calc(100vh - 430px);
+}
+.layout > section:nth-of-type(2) > .card:nth-child(3){
+  flex:0 0 auto;
+}
+
+/* Datos financieros mantiene el ancho completo del lado izquierdo. */
+.financial-full{
+  width:100%;
+  box-sizing:border-box;
+}
+.financial-full .scroll{
+  width:100%;
+  overflow-x:auto;
+}
+.financial-full table{
+  width:100%;
+  table-layout:fixed;
+}
+
+/* Parámetros ocupa todo el ancho del lado derecho. */
+.layout > section:nth-of-type(2) > .card:nth-child(2){
+  width:100%;
+  box-sizing:border-box;
+  margin-bottom:16px;
+}
+@media(max-width:1000px){
+  .layout{grid-template-columns:1fr}
+  .layout > section:nth-of-type(2) > .card:nth-child(2){
+    min-height:0;
+  }
+}
 </style></head>
 <body>
 <header><div class="head">
@@ -186,7 +289,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 
 </div></div>
 
-<div class="financial-param-wrap"><div class="financial-card"><div class="card"><h2>3. Datos financieros (3 últimas boletas)</h2>
+<div class="card financial-full"><h2>3. Datos financieros (3 últimas boletas)</h2>
 <div class="hint">Los promedios se actualizan automáticamente al escribir en cualquier casillero.</div>
 <div class="scroll"><table>
 <thead><tr><th>Concepto</th><th>Boleta 1</th><th>Boleta 2</th><th>Boleta 3</th><th>Promedio</th></tr></thead>
@@ -199,7 +302,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 <tr><td>Facultativo</td><td><input id="fa1" type="number" value="" min="0"></td><td><input id="fa2" type="number" value="" min="0"></td><td><input id="fa3" type="number" value="" min="0"></td><td id="fap">S/ 0.00</td></tr>
 </tbody>
 <tfoot><tr><td><b>Ingreso neto por boleta</b></td><td id="n1">S/ 0.00</td><td id="n2">S/ 0.00</td><td id="n3">S/ 0.00</td><td id="np">S/ 0.00</td></tr></tfoot>
-</table></div></div></div><div class="card"><h2>Parámetros del convenio</h2><div id="params" class="paramgrid"></div><div id="anti" class="info" style="margin-top:9px">Selecciona un perfil.</div></div></div>
+</table></div></div>
 
 
 </section>
@@ -215,6 +318,8 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </div>
 <div id="status" class="status neutral">Selecciona convenio, cargo y condición</div><div id="alerts"></div>
 esultado calculado automáticamente según RCI, facultativos y provisión del convenio.</small></div>
+<div class="card"><h2>Parámetros del convenio</h2><div id="params" class="paramgrid"></div><div id="anti" class="info" style="margin-top:9px">Selecciona un perfil.</div></div>
+
 </div>
 
 
