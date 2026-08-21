@@ -244,7 +244,34 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
     min-height:0;
   }
 }
-</style></head>
+</style>
+<style id="cronograma-v37">
+.cronograma-section{width:100%;margin:18px auto 0}
+.cronograma-section .card{width:100%;box-sizing:border-box}
+.cron-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.cron-sub{margin:4px 0 12px;color:#516174;font-size:12px;line-height:1.4}
+.cron-badge{border:1px solid #c8d6e6;border-radius:18px;padding:7px 12px;font-size:11px;font-weight:700;white-space:nowrap;color:#0b355e;background:#f7fbff}
+.cron-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:10px 0}
+.cron-summary>div{border:1px solid #d5e0ec;border-radius:9px;padding:8px 10px;background:#fbfdff;min-width:0}
+.cron-summary span{display:block;font-size:9px;text-transform:uppercase;color:#64748b;margin-bottom:3px}
+.cron-summary strong{display:block;font-size:13px;color:#0b355e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cron-note{margin:8px 0 10px;padding:9px 11px;border-radius:8px;background:#f4f8fc;border:1px solid #d6e1ed;color:#425466;font-size:11px}
+.cron-table-wrap{width:100%;overflow:auto;border:1px solid #d4dfeb;border-radius:8px}
+.cron-table{width:100%;border-collapse:collapse;min-width:900px;font-size:11px}
+.cron-table th{background:#eef4fa;color:#173b63;font-weight:700;text-align:right;padding:8px 7px;border-bottom:1px solid #ccd9e6;white-space:nowrap}
+.cron-table th:first-child,.cron-table th:nth-child(2){text-align:center}
+.cron-table td{padding:7px;border-bottom:1px solid #e3eaf2;text-align:right;white-space:nowrap}
+.cron-table td:first-child,.cron-table td:nth-child(2){text-align:center}
+.cron-table tr:last-child td{border-bottom:0;font-weight:700}
+.cron-table .grace-row td{background:#fffaf0}
+@media(max-width:900px){
+  .cron-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:600px){
+  .cron-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
 <body>
 <header><div class="head">
 <div class="brand"><div class="logo-zone mca-zone"><img src="logo-mca.png" alt="Master Center Américas"></div><div><div class="title"><img src="logo-calculadora.png" alt="Master Calculadora" class="calculator-logo"></div><div class="sub">Calculadora de Créditos por Convenio</div></div></div>
@@ -339,6 +366,42 @@ esultado calculado automáticamente según RCI, facultativos y provisión del co
 </div>
 
 </div></div></div></div></div></main>
+
+<section class="cronograma-section">
+  <div class="card">
+    <div class="cron-head">
+      <div>
+        <h2>5. Cronograma de simulación</h2>
+        <p class="cron-sub">Replica la hoja <b>Cronograma</b> de la calculadora base: amortización mensual con tasa anual efectiva, fechas según corte/pago y periodo de gracia del convenio.</p>
+      </div>
+      <div class="cron-badge" id="cronStatus">Esperando simulación</div>
+    </div>
+    <div class="cron-summary">
+      <div><span>Monto</span><strong id="cronMonto">S/ 0.00</strong></div>
+      <div><span>Tasa anual</span><strong id="cronTasa">0.00%</strong></div>
+      <div><span>Plazo</span><strong id="cronPlazo">0 meses</strong></div>
+      <div><span>Fecha corte</span><strong id="cronCorte">—</strong></div>
+      <div><span>Fecha pago</span><strong id="cronPago">—</strong></div>
+      <div><span>Periodo gracia</span><strong id="cronGracia">0 meses</strong></div>
+      <div><span>Seguro</span><strong id="cronSeguro">—</strong></div>
+      <div><span>Tasa seguro</span><strong id="cronSeguroPct">0.00%</strong></div>
+      <div><span>Cuota crédito</span><strong id="cronCuota">S/ 0.00</strong></div>
+      <div><span>Cuota total inicial</span><strong id="cronCuotaTotal">S/ 0.00</strong></div>
+    </div>
+    <div class="cron-note" id="cronNote">El cronograma se activa al completar convenio, cargo, condición, seguro, monto y plazo.</div>
+    <div class="cron-table-wrap">
+      <table class="cron-table">
+        <thead>
+          <tr>
+            <th>N°</th><th>Fecha</th><th>Saldo inicial</th><th>Cuota</th>
+            <th>Seguro</th><th>Cuota total</th><th>Interés</th><th>Capital</th><th>Saldo final</th>
+          </tr>
+        </thead>
+        <tbody id="cronBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
 <footer>MCA CALCULADORA · Resultado referencial sujeto a políticas y evaluación del Banco.</footer>
 
 <script>
@@ -708,11 +771,134 @@ function numElement(el){
   return Number.isFinite(n)?Math.max(0,n):0;
 }
 
+
+function parseNumLoose(v){
+  if(v===""||v==null)return 0;
+  if(typeof v==="number")return Number.isFinite(v)?v:0;
+  let s=String(v).trim().replace(/\s/g,"");
+  if(s.includes(",")&&s.includes("."))s=s.replace(/\./g,"").replace(",",".");
+  else if(s.includes(","))s=s.replace(",",".");
+  const n=parseFloat(s.replace(/[^0-9.-]/g,""));
+  return Number.isFinite(n)?n:0;
+}
+function money2(v){
+  return "S/ "+(Number(v)||0).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtDate(d){
+  if(!(d instanceof Date)||Number.isNaN(d.getTime()))return "—";
+  return d.toLocaleDateString("es-PE",{day:"2-digit",month:"2-digit",year:"numeric"});
+}
+function addMonthsSafe(d,n){
+  const base=new Date(d.getFullYear(),d.getMonth()+n,1);
+  const last=new Date(base.getFullYear(),base.getMonth()+1,0).getDate();
+  return new Date(base.getFullYear(),base.getMonth(),Math.min(d.getDate(),last));
+}
+function dateAtDay(year,month,day){
+  const last=new Date(year,month+1,0).getDate();
+  return new Date(year,month,Math.min(Math.max(1,day),last));
+}
+function firstCronDate(cut,pay,grace){
+  const today=new Date();
+  today.setHours(0,0,0,0);
+  cut=Math.max(1,Math.min(31,Math.round(parseNumLoose(cut)||1)));
+  pay=Math.max(1,Math.min(31,Math.round(parseNumLoose(pay)||1)));
+  grace=Math.max(0,Math.round(parseNumLoose(grace)||0));
+
+  // El corte determina el ciclo de desembolso:
+  // antes/en el corte => ciclo del mes actual; después del corte => siguiente ciclo.
+  let cycle;
+  if(today.getDate()<=cut){
+    cycle=new Date(today.getFullYear(),today.getMonth(),1);
+  }else{
+    cycle=new Date(today.getFullYear(),today.getMonth()+1,1);
+  }
+
+  // El pago posterior al corte cae en el mismo mes; si el día de pago
+  // ya quedó antes/dentro del corte, pasa al mes siguiente.
+  let due;
+  if(pay>cut){
+    due=dateAtDay(cycle.getFullYear(),cycle.getMonth(),pay);
+  }else{
+    const next=addMonthsSafe(cycle,1);
+    due=dateAtDay(next.getFullYear(),next.getMonth(),pay);
+  }
+  return addMonthsSafe(due,grace);
+}
+function insurancePctForOption(option){
+  const rates={
+    "Sin devolución":0.05511,
+    "Con devolución":0.05823,
+    "PNP-Sin devolución":0.06503,
+    "PNP-Con devolución":0.06871,
+    "Sin seguro":0
+  };
+  return rates[option]??0;
+}
+function renderCronograma(r,monto,plazo,tea,seguro){
+  const body=$("cronBody");
+  if(!body)return;
+  body.innerHTML="";
+  const note=$("cronNote");
+  const cut=parseNumLoose(r["Fecha de corte "] ?? r["Fecha de corte"]);
+  const payDay=parseNumLoose(r["Fecha de pago"]);
+  const grace=parseNumLoose(r["Periodo de gracia"]);
+  const maxMonths=parseNumLoose(r["Cuotas máximas (meses)"]);
+  const n=Math.max(0,Math.min(Math.round(plazo||0),Math.round(maxMonths||120)));
+  const monthly=monthlyRate(tea);
+  const creditFactor=monthly/(1-Math.pow(1+monthly,-n));
+  const creditPayment=n>0?monto*creditFactor:0;
+  const insRate=insurancePctForOption(seguro);
+  const firstDue=firstCronDate(cut,payDay,grace);
+
+  $("cronMonto").textContent=money2(monto);
+  $("cronTasa").textContent=pct(tea);
+  $("cronPlazo").textContent=n+" meses";
+  $("cronCorte").textContent=cut?String(Math.round(cut)):"—";
+  $("cronPago").textContent=payDay?String(Math.round(payDay)):"—";
+  $("cronGracia").textContent=(grace||0)+" meses";
+  $("cronSeguro").textContent=seguro||"—";
+  $("cronSeguroPct").textContent=pct(insRate);
+  $("cronCuota").textContent=money2(creditPayment);
+  $("cronCuotaTotal").textContent=money2(creditPayment+(monto*insRate));
+  $("cronStatus").textContent=n&&tea&&monto?"Cronograma actualizado":"Esperando simulación";
+
+  if(!n||!tea||!monto){
+    if(note)note.textContent="Completa monto, plazo, seguro y perfil del convenio para generar el cronograma.";
+    return;
+  }
+  if(note){
+    note.textContent="La cuota de crédito usa exactamente la misma tasa mensual y PMT de la hoja Cronograma de la calculadora base. El seguro se muestra aparte sobre el saldo insoluto; la cuota total suma ambas.";
+  }
+
+  let balance=monto;
+  for(let i=1;i<=n;i++){
+    const interest=balance*monthly;
+    const capital=(i===n)?balance:Math.min(balance,Math.max(0,creditPayment-interest));
+    const creditDue=interest+capital;
+    const insurance=balance*insRate;
+    const totalDue=creditDue+insurance;
+    const final=Math.max(0,balance-capital);
+    const due=addMonthsSafe(firstDue,i-1);
+    const tr=document.createElement("tr");
+    if(i<=grace)tr.className="grace-row";
+    [i,fmtDate(due),money2(balance),money2(creditDue),money2(insurance),money2(totalDue),money2(interest),money2(capital),money2(final)]
+      .forEach((v,idx)=>{
+        const td=document.createElement("td");
+        td.textContent=v;
+        tr.appendChild(td);
+      });
+    body.appendChild(tr);
+    balance=final;
+  }
+}
 function calc(){
   calculateFinancialTable();
   const r=current();
   if(!r){
     resetResult();
+    if($("cronBody"))$("cronBody").innerHTML="";
+    if($("cronStatus"))$("cronStatus").textContent="Esperando simulación";
+    if($("cronNote"))$("cronNote").textContent="El cronograma se activa al completar convenio, cargo, condición, seguro, monto y plazo.";
     if($("conv")?.value && $("cargo")?.value && $("cond")?.value){
       console.warn("MCA: perfil no encontrado", {
         convenio:$("conv").value, cargo:$("cargo").value, condicion:$("cond").value
@@ -756,6 +942,7 @@ function calc(){
     ["Tasa con seguro",r["Tasa Con Seguro"]||"—"],["Tasa sin seguro",r["Tasa Sin Seguro"]||"—"],["Tasa aplicada",tea?pct(tea):"—"]
   ].map(x=>'<div class="param"><b>'+esc(x[0])+'</b><span>'+esc(x[1])+'</span></div>').join("");
   $("anti").innerHTML="<b>Antigüedad requerida:</b> "+esc(r["Antiguedad de servidor (Años)"]||"No especificada")+" años";
+  renderCronograma(r,monto,plazo,tea,seguro);
   $("gen").value=r["Consideraciones generales"]||"";$("esp").value=r["Condiciones Específicas"]||"";
   $("detail").innerHTML="<b>Ingreso fijo promedio:</b> "+money(fi)+"<br><b>Ingreso variable promedio:</b> "+money(va)+"<br><b>Conversión ingreso variable:</b> "+pct(variablePct)+"<br><b>Ingreso variable convertido:</b> "+money(variableConvertido)+"<br><b>Descuento de ley promedio:</b> "+money(ley)+"<br><b>Facultativos promedio:</b> "+money(facult)+"<br><b>Provisión automática:</b> "+money(provision)+"<br><b>Cuota máxima disponible:</b> "+money(cuotaMaxima);
   $("alerts").innerHTML=alerts.map(x=>'<div class="alert">⚠ '+esc(x)+'</div>').join("");
