@@ -785,6 +785,283 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 #cronogramaView .cron-signature{margin-top:115px!important;margin-left:12px!important}
 }
 </style>
+
+<style id="mca-v64-print-exact">
+/* V64 - impresión A4 igual al modelo PRUEBA 0 */
+@media print{
+  @page{
+    size:A4 portrait;
+    margin:14mm 13mm 12mm 13mm;
+  }
+
+  html,body{
+    width:auto!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:0!important;
+    padding:0!important;
+    background:#fff!important;
+    overflow:visible!important;
+    color:#111!important;
+  }
+
+  body>*:not(#cronogramaView):not(footer){
+    display:none!important;
+  }
+
+  #cronogramaView{
+    display:block!important;
+    position:static!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    background:#fff!important;
+  }
+
+  #cronogramaView .cron-sheet{
+    width:100%!important;
+    max-width:none!important;
+    box-sizing:border-box!important;
+    margin:0!important;
+    padding:3.5mm 3.5mm 4.5mm!important;
+    border:1px solid #a9a9a9!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    background:#fff!important;
+    overflow:visible!important;
+  }
+
+  #cronogramaView .cron-sheet-toolbar{
+    display:none!important;
+  }
+
+  #cronogramaView .cron-sheet-header{
+    height:auto!important;
+    margin:0 0 4px!important;
+  }
+
+  #cronogramaView .sheet-title{
+    font-family:Arial,Helvetica,sans-serif!important;
+    color:#001391!important;
+    font-size:10.5px!important;
+    line-height:1.1!important;
+    font-weight:700!important;
+    text-decoration:underline!important;
+  }
+
+  /* Distribución de datos exactamente en 4 columnas */
+  #cronogramaView .cron-data-grid{
+    display:grid!important;
+    grid-template-columns:1.15fr 1.15fr 1.15fr 1.15fr!important;
+    grid-auto-rows:20px!important;
+    column-gap:7px!important;
+    row-gap:4px!important;
+    margin:0!important;
+  }
+
+  #cronogramaView .cron-field{
+    min-width:0!important;
+    min-height:20px!important;
+    height:auto!important;
+  }
+
+  #cronogramaView .cron-field label{
+    display:block!important;
+    margin:0 0 1px 1px!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    color:#111!important;
+    font-size:7.2px!important;
+    line-height:1.05!important;
+    font-weight:700!important;
+  }
+
+  #cronogramaView .sheet-value,
+  #cronogramaView .sheet-input{
+    box-sizing:border-box!important;
+    min-height:15px!important;
+    height:15px!important;
+    width:100%!important;
+    padding:1px 3px!important;
+    border:1px solid #c4ccd5!important;
+    border-radius:0!important;
+    background:#edf0f2!important;
+    color:#333!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:7.1px!important;
+    line-height:1.05!important;
+  }
+
+  #cronogramaView .multiline{
+    min-height:26px!important;
+    height:26px!important;
+    white-space:pre-line!important;
+    line-height:1.05!important;
+  }
+
+  #cronogramaView .inline-values{
+    display:grid!important;
+    grid-template-columns:1fr 1.15fr!important;
+    gap:0!important;
+  }
+
+  /* Posiciones del modelo PRUEBA 0 */
+  #cronogramaView .convenio-field{grid-column:1!important;grid-row:1!important}
+  #cronogramaView .cargo-field{grid-column:2!important;grid-row:1!important}
+  #cronogramaView .rates-field{grid-column:3!important;grid-row:1 / span 2!important}
+  #cronogramaView .special-field{grid-column:4!important;grid-row:1!important}
+
+  #cronogramaView .cuotas-field{grid-column:1!important;grid-row:3!important}
+  #cronogramaView .rates-sin-field{grid-column:2!important;grid-row:2 / span 2!important}
+  #cronogramaView .editable-field{grid-column:3!important;grid-row:3!important}
+  #cronogramaView .gracia-field{grid-column:4!important;grid-row:3!important}
+
+  #cronogramaView .insurance-field{grid-column:1!important;grid-row:4!important}
+  #cronogramaView .dni-field{grid-column:2!important;grid-row:4!important}
+  #cronogramaView .duration-field{grid-column:3!important;grid-row:4!important}
+  #cronogramaView .seguro-importe-field{grid-column:4!important;grid-row:4!important}
+
+  #cronogramaView .corte-field{grid-column:1!important;grid-row:5!important}
+  #cronogramaView .monto-field{grid-column:2!important;grid-row:5!important}
+  #cronogramaView .tea-field{grid-column:3!important;grid-row:5!important}
+  #cronogramaView .pago-field{grid-column:4!important;grid-row:5!important}
+
+  #cronogramaView .primer-field{grid-column:1!important;grid-row:6!important}
+  #cronogramaView .tcea-field{grid-column:3!important;grid-row:6!important}
+  #cronogramaView .qmax-field{grid-column:4!important;grid-row:6!important}
+
+  #cronogramaView .desembolso-field{grid-column:1!important;grid-row:7!important}
+  #cronogramaView .solicitud-field{grid-column:4!important;grid-row:7!important}
+
+  #cronogramaView .cron-blue-title{
+    margin:5px 0 2px!important;
+    padding:3px 5px!important;
+    height:auto!important;
+    box-sizing:border-box!important;
+    background:#001391!important;
+    color:#fff!important;
+    border-radius:0!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:10px!important;
+    line-height:1.05!important;
+    font-weight:700!important;
+    text-align:center!important;
+  }
+
+  #cronogramaView .cron-table-wrap{
+    width:100%!important;
+    max-height:none!important;
+    min-height:0!important;
+    overflow:visible!important;
+    border:0!important;
+    margin:0!important;
+  }
+
+  #cronogramaView .cron-base-table{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    table-layout:fixed!important;
+    border-collapse:collapse!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:6.6px!important;
+    color:#111!important;
+  }
+
+  #cronogramaView .cron-base-table th{
+    background:#f3f3f3!important;
+    color:#111!important;
+    border:1px solid #aeb7c2!important;
+    padding:2px 1px!important;
+    font-size:6.3px!important;
+    line-height:1!important;
+    font-weight:700!important;
+    text-align:center!important;
+    white-space:normal!important;
+  }
+
+  #cronogramaView .cron-base-table td{
+    border:0!important;
+    padding:1px 2px!important;
+    font-size:6.4px!important;
+    line-height:1.03!important;
+    color:#111!important;
+    background:#fff!important;
+    white-space:nowrap!important;
+    text-align:right!important;
+  }
+
+  #cronogramaView .cron-base-table td:first-child,
+  #cronogramaView .cron-base-table td:nth-child(2){
+    text-align:center!important;
+  }
+
+  #cronogramaView .cron-base-table tr.grace-row td{
+    background:#fffaf0!important;
+  }
+
+  #cronogramaView .cron-ellipsis-row td{
+    height:7px!important;
+    padding:0!important;
+    font-size:6px!important;
+    line-height:1!important;
+  }
+
+  #cronogramaView .cron-last-summary-row td{
+    font-weight:700!important;
+  }
+
+  #cronogramaView .cron-last-summary-row td:first-child{
+    background:#f7d99f!important;
+  }
+
+  #cronogramaView .cron-total-row td{
+    border-top:1px solid #8d8d8d!important;
+    font-weight:700!important;
+    background:#fff!important;
+  }
+
+  #cronogramaView .cron-notes{
+    margin:13px 3px 0!important;
+    padding:0!important;
+    min-height:0!important;
+    color:#111!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:6.5px!important;
+    line-height:1.12!important;
+  }
+
+  #cronogramaView .cron-notes p{
+    margin:0 0 3px!important;
+  }
+
+  #cronogramaView .cron-signature{
+    width:155px!important;
+    margin:28px 0 0 5px!important;
+    padding:0!important;
+    text-align:center!important;
+    color:#111!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:7px!important;
+    line-height:1.1!important;
+  }
+
+  /* Footer como en PRUEBA 0: fuera del recuadro y abajo */
+  body>footer{
+    display:block!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+    margin:7mm 0 0!important;
+    padding:0!important;
+    background:#fff!important;
+    color:#111!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:6.5px!important;
+    line-height:1.1!important;
+    text-align:left!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <header><div class="head">
