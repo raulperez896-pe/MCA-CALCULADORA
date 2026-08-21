@@ -373,23 +373,26 @@ esultado calculado automáticamente según RCI, facultativos y provisión del co
     <div class="cron-head">
       <div>
         <h2>5. Cronograma de simulación</h2>
-        <p class="cron-sub">Replica la hoja <b>Cronograma</b> de la calculadora base: amortización mensual con tasa anual efectiva, fechas según corte/pago y periodo de gracia del convenio.</p>
+        <p class="cron-sub">Modelo de cronograma preliminar: fecha de desembolso + corte + vencimiento + periodo de gracia + interés diario + seguro sobre saldo insoluto.</p>
       </div>
       <div class="cron-badge" id="cronStatus">Esperando simulación</div>
     </div>
     <div class="cron-summary">
       <div><span>Fecha desembolso</span><strong id="cronDesembolso">—</strong></div>
       <div><span>Días de gracia calculados</span><strong id="cronDiasGracia">0 días</strong></div>
-      <div><span>Monto</span><strong id="cronMonto">S/ 0.00</strong></div>
-      <div><span>Tasa anual</span><strong id="cronTasa">0.00%</strong></div>
+      <div><span>Monto principal solicitado</span><strong id="cronMonto">S/ 0.00</strong></div>
+      <div><span>Tasa efectiva anual</span><strong id="cronTasa">0.00%</strong></div>
       <div><span>Plazo</span><strong id="cronPlazo">0 meses</strong></div>
-      <div><span>Fecha corte</span><strong id="cronCorte">—</strong></div>
-      <div><span>Fecha pago</span><strong id="cronPago">—</strong></div>
+      <div><span>Fecha de corte</span><strong id="cronCorte">—</strong></div>
+      <div><span>Día de vencimiento</span><strong id="cronPago">—</strong></div>
       <div><span>Periodo gracia</span><strong id="cronGracia">0 meses</strong></div>
       <div><span>Seguro</span><strong id="cronSeguro">—</strong></div>
       <div><span>Tasa seguro</span><strong id="cronSeguroPct">0.00%</strong></div>
-      <div><span>Cuota crédito</span><strong id="cronCuota">S/ 0.00</strong></div>
-      <div><span>Cuota total inicial</span><strong id="cronCuotaTotal">S/ 0.00</strong></div>
+      <div><span>Cuota del crédito</span><strong id="cronCuota">S/ 0.00</strong></div>
+      <div><span>Total a pagar inicial</span><strong id="cronCuotaTotal">S/ 0.00</strong></div>
+      <div><span>Importe seguro desgrav.</span><strong id="cronSeguroImporte">S/ 0.00</strong></div>
+      <div><span>Primer vencimiento</span><strong id="cronPrimerVencimiento">—</strong></div>
+      <div><span>TCEA referencial</span><strong id="cronTcea">0.00%</strong></div>
     </div>
     <div class="cron-note" id="cronNote">El cronograma se activa al completar convenio, cargo, condición, seguro, fecha de desembolso, monto y plazo.</div>
     <div class="cron-table-wrap">
@@ -809,22 +812,14 @@ function dateAtDay(year,month,day){
   return new Date(year,month,Math.min(Math.max(1,day),last));
 }
 function firstCronDate(disbursement,cut,pay,grace){
-  const base=new Date(disbursement);
-  base.setHours(0,0,0,0);
+  const base=new Date(disbursement); base.setHours(0,0,0,0);
   cut=Math.max(1,Math.min(31,Math.round(parseNumLoose(cut)||1)));
   pay=Math.max(1,Math.min(31,Math.round(parseNumLoose(pay)||1)));
   grace=Math.max(0,Math.round(parseNumLoose(grace)||0));
-
-  // El ciclo se determina con la fecha real de desembolso, no con la fecha actual.
-  let cycle;
-  if(base.getDate()<=cut){
-    cycle=new Date(base.getFullYear(),base.getMonth(),1);
-  }else{
-    cycle=new Date(base.getFullYear(),base.getMonth()+1,1);
-  }
-
-  // Si el día de pago está después del corte, vence en ese ciclo; de lo contrario,
-  // vence en el siguiente ciclo. Luego se aplica el periodo de gracia del convenio.
+  // El ciclo de remesa se determina desde la fecha real de desembolso.
+  let cycle = base.getDate()<=cut
+    ? new Date(base.getFullYear(),base.getMonth(),1)
+    : new Date(base.getFullYear(),base.getMonth()+1,1);
   let due;
   if(pay>cut){
     due=dateAtDay(cycle.getFullYear(),cycle.getMonth(),pay);
@@ -845,55 +840,58 @@ function insurancePctForOption(option){
   };
   return rates[option]??0;
 }
+
+function cronTcea(tea,insuranceRate){
+  // TCEA referencial: incorpora la prima mensual del seguro sobre saldo.
+  // Se muestra como referencia, no sustituye la TCEA oficial del banco.
+  const m=(tea/100)/12 + (insuranceRate||0);
+  return Math.pow(1+m,12)-1;
+}
+
 function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   const body=$("cronBody");
-  if(!body)return;
+  if(!body)return null;
   body.innerHTML="";
   const note=$("cronNote");
-
   const cut=parseNumLoose(r["Fecha de corte "] ?? r["Fecha de corte"]);
   const payDay=parseNumLoose(r["Fecha de pago"]);
   const grace=Math.max(0,Math.round(parseNumLoose(r["Periodo de gracia"])));
   const maxMonths=Math.round(parseNumLoose(r["Cuotas máximas (meses)"]));
   const n=Math.max(0,Math.min(Math.round(plazo||0),maxMonths||120));
-
   if(!n||!monto||!tea){
-    if(note)note.textContent="Completa monto, plazo, seguro y perfil del convenio para generar el cronograma.";
-    return;
+    if(note)note.textContent="Completa monto, plazo, seguro, fecha de desembolso y perfil del convenio para generar el cronograma.";
+    return null;
   }
 
   /*
-   MODELO V39 — CRONOGRAMA TIPO BANCO
-   1) Se determina el primer vencimiento según corte/pago y periodo de gracia.
-   2) El interés generado durante gracia se capitaliza al saldo.
-   3) La cuota se calcula sobre el saldo capitalizado.
-   4) La tasa de cuota usa TEA/12, como el modelo de cronograma preliminar.
-   5) Interés de cada periodo = saldo inicial × TEA/12.
-   6) Seguro se muestra separado y se calcula sobre el saldo insoluto.
+   MODELO CRONOGRAMA MCA — PRELIMINAR BBVA
+   - La fecha de corte y la fecha de desembolso determinan el ciclo.
+   - El periodo de gracia desplaza el primer vencimiento.
+   - El interés del periodo de gracia se capitaliza diariamente con base 360.
+   - La tasa mensual de cuota usa TEA/12.
+   - El interés de cada cuota se calcula sobre saldo insoluto y días reales del periodo,
+     con base 360, siguiendo la nota contractual del BBVA.
+   - El seguro se calcula sobre saldo insoluto y prorratea por días/30.
   */
-  const desembolso=parseInputDate(fechaDesembolso)||new Date();
-  desembolso.setHours(0,0,0,0);
-
+  const desembolso=parseInputDate(fechaDesembolso)||new Date(); desembolso.setHours(0,0,0,0);
   const firstDue=firstCronDate(desembolso,cut,payDay,grace);
-  // La fecha de inicio del devengo se coloca un mes antes del primer vencimiento,
-  // replicando el cronograma preliminar mostrado por el usuario.
   const accrualStart=new Date(firstDue.getFullYear(),firstDue.getMonth()-1,firstDue.getDate());
-
   const daysGrace=Math.max(0,Math.round((accrualStart-desembolso)/86400000));
-  const graceInterest=monto*(tea/100)*(daysGrace/365);
-
-  // Capital que pasa al cronograma después del periodo de gracia.
+  const graceInterest=monto*(Math.pow(1+tea/100,daysGrace/360)-1);
   const financed=Math.max(0,monto+graceInterest);
 
-  // La hoja base usa PMT con tasa anual equivalente mensual.
-  const monthlyRate=tea/100/12;
+  // Cuota base del crédito: se calcula sobre el capital capitalizado.
+  const monthlyRate=(tea/100)/12;
   const creditPayment=monthlyRate>0
     ? financed*monthlyRate/(1-Math.pow(1+monthlyRate,-n))
     : financed/n;
 
-  // Seguro de desgravamen: la tasa de la base se interpreta como porcentaje mensual.
   const insuranceRate=insurancePctForOption(seguro);
-  const firstInsurance=financed*insuranceRate;
+  const firstInsurance=insuranceRate>0
+    ? financed*insuranceRate*((Math.max(1,(firstDue-accrualStart)/86400000))/30)
+    : 0;
+  const totalFirst=creditPayment+firstInsurance;
+  const tcea=cronTcea(tea,insuranceRate);
 
   $("cronDesembolso").textContent=fmtDate(desembolso);
   $("cronDiasGracia").textContent=daysGrace+" días";
@@ -906,38 +904,43 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   $("cronSeguro").textContent=seguro||"—";
   $("cronSeguroPct").textContent=pct(insuranceRate);
   $("cronCuota").textContent=money2(creditPayment);
-  $("cronCuotaTotal").textContent=money2(creditPayment+firstInsurance);
+  $("cronCuotaTotal").textContent=money2(totalFirst);
+  if($("cronTcea"))$("cronTcea").textContent=pct(tcea);
+  if($("cronPrincipal"))$("cronPrincipal").textContent=money2(financed);
+  if($("cronSeguroImporte"))$("cronSeguroImporte").textContent=money2(firstInsurance);
+  if($("cronPrimerVencimiento"))$("cronPrimerVencimiento").textContent=fmtDate(firstDue);
   $("cronStatus").textContent="Cronograma actualizado";
+  if(note)note.textContent=`Capital inicial del cronograma: ${money2(financed)}. El periodo de gracia genera ${money2(graceInterest)} de interés capitalizado durante ${daysGrace} días.`;
 
-  if(note){
-    note.textContent=`Modelo preliminar: capital inicial S/ ${financed.toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2})} después de capitalizar intereses de gracia. La cuota no incluye el seguro; el seguro se muestra separado.`;
-  }
-
-  // Fila de capitalización del periodo de gracia, como en la imagen de referencia.
+  // Fila de capitalización del periodo de gracia, exactamente separada de las cuotas.
   if(daysGrace>0){
-    const tr=document.createElement("tr");
-    tr.className="grace-row";
-    const vals=["—",fmtDate(accrualStart),money2(monto),money2(graceInterest),money2(graceInterest),"S/ 0.00",money2(graceInterest),"S/ 0.00",money2(financed)];
+    const tr=document.createElement("tr"); tr.className="grace-row";
+    const vals=["—",fmtDate(accrualStart),money2(monto),"("+money2(graceInterest).replace("S/ ","")+")",money2(graceInterest),"S/ 0.00",money2(graceInterest),"S/ 0.00",money2(financed)];
     vals.forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td);});
     body.appendChild(tr);
   }
 
   let balance=financed;
+  let prevDate=accrualStart;
   for(let i=1;i<=n;i++){
-    const interest=balance*monthlyRate;
+    const due=addMonthsSafe(firstDue,i-1);
+    // BBVA usa interés anual calculado sobre 360 días y capitalización diaria.
+    const periodDays=Math.max(1,Math.round((due-prevDate)/86400000)-1);
+    const interest=balance*((Math.pow(1+tea/100,periodDays/360))-1);
+    const insurance=insuranceRate>0 ? balance*insuranceRate*(Math.max(1,periodDays)/30) : 0;
+    // Para mantener una cuota estable del crédito, la amortización es la cuota base menos interés.
+    // La última cuota absorbe el saldo remanente por redondeos.
     const capital=(i===n)?balance:Math.min(balance,Math.max(0,creditPayment-interest));
-    const payment=(i===n)?interest+capital:creditPayment;
-    const insurance=balance*insuranceRate;
+    const payment=(i===n)?interest+capital:Math.max(0,creditPayment);
     const total=payment+insurance;
     const final=Math.max(0,balance-capital);
-    const due=addMonthsSafe(firstDue,i-1);
-
     const tr=document.createElement("tr");
-    [i,fmtDate(due),money2(balance),money2(capital),money2(interest),"S/ 0.00",money2(payment),money2(insurance),money2(total)]
+    [i,fmtDate(due),money2(balance),"("+money2(capital).replace("S/ ","")+")",money2(interest),"S/ 0.00",money2(payment),money2(insurance),money2(total)]
       .forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td);});
     body.appendChild(tr);
-    balance=final;
+    balance=final; prevDate=due;
   }
+  return {creditPayment,firstInsurance,totalFirst,financed,graceInterest,daysGrace,firstDue,tcea};
 }
 
 function calc(){
@@ -964,7 +967,8 @@ function calc(){
   const rci=parsePct(r["RCI boleta\n(Descuento máximo)"]);
   const provision=parseMoney(r["Provisión"]);
   const cuotaMaxima=Math.max(0,baseRCI*rci-facult-provision);
-  const cuota=tea?monto*factor(tea,plazo):0;
+  const cron=tea&&monto&&plazo ? renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso) : null;
+  const cuota=cron?.totalFirst||0;
   const deudas=totalOtherBankQuotas();
   const globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley-facult);
   const limite=edad>60?parsePct(r["Endeudamiento máximo \n(+ 60 años)"]):parsePct(r["Endeudamiento máximo \n(- 60 años)"]);
@@ -991,7 +995,7 @@ function calc(){
     ["Tasa con seguro",r["Tasa Con Seguro"]||"—"],["Tasa sin seguro",r["Tasa Sin Seguro"]||"—"],["Tasa aplicada",tea?pct(tea):"—"]
   ].map(x=>'<div class="param"><b>'+esc(x[0])+'</b><span>'+esc(x[1])+'</span></div>').join("");
   $("anti").innerHTML="<b>Antigüedad requerida:</b> "+esc(r["Antiguedad de servidor (Años)"]||"No especificada")+" años";
-  renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso);
+  if(!cron && tea&&monto&&plazo) renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso);
   $("gen").value=r["Consideraciones generales"]||"";$("esp").value=r["Condiciones Específicas"]||"";
   $("detail").innerHTML="<b>Ingreso fijo promedio:</b> "+money(fi)+"<br><b>Ingreso variable promedio:</b> "+money(va)+"<br><b>Conversión ingreso variable:</b> "+pct(variablePct)+"<br><b>Ingreso variable convertido:</b> "+money(variableConvertido)+"<br><b>Descuento de ley promedio:</b> "+money(ley)+"<br><b>Facultativos promedio:</b> "+money(facult)+"<br><b>Provisión automática:</b> "+money(provision)+"<br><b>Cuota máxima disponible:</b> "+money(cuotaMaxima);
   $("alerts").innerHTML=alerts.map(x=>'<div class="alert">⚠ '+esc(x)+'</div>').join("");
