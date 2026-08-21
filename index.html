@@ -273,7 +273,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v44-responsive">
-/* V44: el cronograma se calcula internamente; su detalle queda oculto. */
+/* V45: el cronograma se calcula internamente; su detalle queda oculto. */
 @media (max-width: 900px){
   body{overflow-x:hidden}
   .container,.page,.main-container{width:100%!important;max-width:100%!important}
@@ -295,6 +295,13 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   .debts-table{display:block;overflow-x:auto}
   .debts-table table{min-width:760px}
 }
+</style>
+
+<style id="mca-v45-age">
+.result-box{border:1px solid #d5e0ee;border-radius:12px;padding:12px 14px;background:#f8fbff}
+.result-box span{display:block;font-size:10px;color:#5c6f86;font-weight:700}
+.result-box strong{display:block;font-size:18px;margin-top:4px}
+@media(max-width:640px){.result-box{width:100%;box-sizing:border-box}}
 </style>
 </head>
 <body>
@@ -335,7 +342,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 
 <div class="card"><h2>2. Datos del cliente y solicitud</h2>
 <div class="grid">
-<div><label>Edad actual</label><input id="edad" type="number" min="18" max="100"></div>
+<div><label>Fecha de nacimiento</label><input type="date" id="fechaNacimiento" type="number" min="18" max="100"></div>
 <div><label>Fecha de desembolso</label><input id="fechaDesembolso" type="date" aria-label="Fecha de desembolso"></div>
 <div><label>Monto solicitado (S/.)</label><input id="monto" type="number" min="0" step="100"></div>
 <div><label>Plazo (meses)</label><input id="plazo" type="number" min="1" max="120" value="60"></div>
@@ -368,6 +375,11 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 <div class="metric"><div class="k">Ingreso neto promedio</div><div class="v" id="neto">S/ 0.00</div></div>
 <div class="metric"><div class="k">Cuota máxima</div><div class="v" id="qmax">S/ 0.00</div></div>
 <div class="metric"><div class="k">Endeudamiento final</div><div class="v" id="end">0.00%</div></div>
+</div>
+
+<div class="result-box">
+  <span>PLAZO MÁXIMO</span>
+  <strong id="plazoMaximoResultado">—</strong>
 </div>
 <div id="status" class="status neutral">Selecciona convenio, cargo y condición</div><div id="alerts"></div>
 esultado calculado automáticamente según RCI, facultativos y provisión del convenio.</small></div>
@@ -889,7 +901,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-   MODELO V44 — réplica del cronograma mostrado por el usuario.
+   MODELO V45 — réplica del cronograma mostrado por el usuario.
 
    1. Fecha de desembolso + corte + vencimiento determinan el primer periodo
       de gracia.
@@ -1054,6 +1066,82 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
     tcea,
     installments:n
   };
+}
+
+function parseInputDate(value){
+  if(!value)return null;
+  const m=String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m)return null;
+  const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+  d.setHours(0,0,0,0);
+  return isNaN(d.getTime())?null:d;
+}
+
+function addYearsSafe(date,years){
+  const d=new Date(date);
+  const y=d.getFullYear()+years;
+  const m=d.getMonth(), day=d.getDate();
+  const last=new Date(y,m+1,0).getDate();
+  return new Date(y,m,Math.min(day,last));
+}
+
+function addMonthsSafe2(date,months){
+  const d=new Date(date);
+  const targetMonth=d.getMonth()+months;
+  const y=d.getFullYear()+Math.floor(targetMonth/12);
+  const m=((targetMonth%12)+12)%12;
+  const last=new Date(y,m+1,0).getDate();
+  return new Date(y,m,Math.min(d.getDate(),last));
+}
+
+function monthsBetweenWhole(start,end){
+  // Number of complete monthly periods from start to end.
+  let months=(end.getFullYear()-start.getFullYear())*12+(end.getMonth()-start.getMonth());
+  if(addMonthsSafe2(start,months)>end)months--;
+  return Math.max(0,months);
+}
+
+function calcularPlazoMaximo(fechaNacimiento,fechaDesembolso,edadMaxima){
+  const dob=parseInputDate(fechaNacimiento);
+  const desemb=parseInputDate(fechaDesembolso)||new Date();
+  const ageMax=Number(edadMaxima);
+  if(!dob||!Number.isFinite(ageMax)||ageMax<=0)return null;
+
+  // The last allowed maturity is exactly ONE MONTH before the birthday
+  // on which the customer reaches the maximum permitted age.
+  const birthdayMax=addYearsSafe(dob,Math.floor(ageMax));
+  const lastMaturity=addMonthsSafe2(birthdayMax,-1);
+
+  // If the customer is already beyond the permitted maturity, no term.
+  if(lastMaturity<=desemb)return 0;
+
+  return monthsBetweenWhole(desemb,lastMaturity);
+}
+
+function actualizarPlazoMaximo(){
+  const dob=$("fechaNacimiento");
+  const desemb=$("fechaDesembolso");
+  const out=$("plazoMaximoResultado");
+  if(!dob||!out)return null;
+
+  // Find age maximum from the currently selected profile.
+  const convenio=$("convenio")?.value;
+  const cargo=$("cargo")?.value;
+  const condicion=$("condicion")?.value;
+  let r=null;
+  try{
+    if(typeof findProfile==="function")r=findProfile(convenio,cargo,condicion);
+  }catch(e){}
+  if(!r && typeof currentProfile!=="undefined")r=currentProfile;
+
+  const edadMax=parseNumLoose(r?.["Edad máxima"] ?? r?.["Edad maxima"] ?? r?.["Edad Máxima"]);
+  const max=calcularPlazoMaximo(dob.value,desemb?.value,edadMax);
+  if(max===null){
+    out.textContent="—";
+    return null;
+  }
+  out.textContent=max+" meses";
+  return max;
 }
 
 function calc(){
@@ -1243,6 +1331,17 @@ document.addEventListener("DOMContentLoaded",()=>{
   }catch(err){
     console.error("MCA init error",err);
     $("badge").textContent="Error de inicialización";
+  }
+});
+
+["fechaNacimiento","fechaDesembolso","convenio","cargo","condicion"].forEach(id=>{
+  const el=$(id);
+  if(el)el.addEventListener("change",()=>setTimeout(actualizarPlazoMaximo,0));
+});
+
+document.addEventListener("change",function(e){
+  if(["convenio","cargo","condicion","fechaNacimiento","fechaDesembolso"].includes(e.target?.id)){
+    setTimeout(actualizarPlazoMaximo,50);
   }
 });
 </script>
