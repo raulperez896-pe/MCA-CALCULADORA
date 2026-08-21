@@ -1,10 +1,17 @@
-# MCA CALCULADORA V37
+# MCA CALCULADORA V40
 
-Se agrega el módulo 5. Cronograma de simulación, basado en la hoja Cronograma de Calculadora_Convenios_Base_2026.xlsx.
+## Cambio principal
+Se agregó **Fecha de desembolso** como campo editable en la calculadora.
 
-- Columnas: N°, Fecha, Saldo inicial, Cuota, Seguro, Cuota total, Interés, Capital y Saldo final.
-- La cuota de crédito usa exactamente la misma tasa mensual y fórmula PMT de la hoja base: (1+tasa anual)^(1/12)-1.
-- Las fechas consideran Fecha de corte, Fecha de pago y Periodo de gracia del perfil seleccionado.
-- El seguro se calcula mensualmente sobre el saldo insoluto y se muestra separado; la cuota total = cuota de crédito + seguro.
-- La cuota de crédito del cronograma coincide con la cuota simulada de la tarjeta de resultados.
-- Mantiene la base de convenios, accesos, tasas, promedio de boletas y correcciones anteriores.
+El cronograma ya no toma la fecha actual para determinar los días de gracia. Utiliza la fecha real ingresada por el usuario y calcula:
+
+- ciclo según fecha de desembolso y fecha de corte;
+- primer vencimiento según fecha de pago;
+- periodo de gracia del convenio;
+- fecha de inicio de devengo (un mes antes del primer vencimiento);
+- número exacto de días entre desembolso y devengo;
+- interés generado por esos días;
+- capitalización de ese interés al saldo inicial;
+- cronograma posterior con amortización, interés, seguro y total a pagar.
+
+También se muestran en el resumen **Fecha desembolso** y **Días de gracia calculados**.
