@@ -101,6 +101,46 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 @media(max-width:1000px){
   .financial-param-wrap{grid-template-columns:1fr}
 }
+</style><style id="layout-v33">
+/* Sección 3: mismo ancho total que las secciones 1 y 2 */
+.financial-param-wrap{
+  display:grid;
+  grid-template-columns:minmax(0,2fr) minmax(300px,1fr);
+  gap:16px;
+  width:100%;
+  align-items:stretch;
+}
+.financial-param-wrap .financial-card{
+  min-width:0;
+  width:100%;
+}
+.financial-param-wrap .financial-card>.card{
+  width:100%;
+  box-sizing:border-box;
+  height:100%;
+  margin-bottom:0;
+}
+.financial-param-wrap>.card{
+  width:100%;
+  box-sizing:border-box;
+  margin-bottom:0;
+  min-height:250px;
+  align-self:stretch;
+}
+.financial-param-wrap .scroll{
+  width:100%;
+}
+.financial-param-wrap table{
+  width:100%;
+  table-layout:auto;
+}
+.financial-param-wrap td:first-child{
+  min-width:150px;
+}
+@media(max-width:1000px){
+  .financial-param-wrap{grid-template-columns:1fr}
+  .financial-param-wrap>.card{min-height:0}
+}
 </style></head>
 <body>
 <header><div class="head">
@@ -405,8 +445,12 @@ function calculateFinancialTable(){
     const net=num("f"+i)+num("v"+i)+num("nc"+i)+num("ad"+i)-num("l"+i)-num("fa"+i);
     setMoney("n"+i,Math.max(0,net));
   }
-  const nets=activeBoletas.map(i=>num("n"+i));
-  setMoney("np",nets.length?nets.reduce((a,b)=>a+b,0)/nets.length:0);
+  // El promedio de ingreso neto usa únicamente las boletas que tienen
+  // información financiera. Nunca divide automáticamente entre 3.
+  const nets=[1,2,3].filter(i=>
+    ["f","v","nc","ad","l","fa"].some(prefix=>String($(prefix+i)?.value??"").trim()!=="")
+  ).map(i=>num("n"+i));
+  setMoney("np",nets.length ? nets.reduce((a,b)=>a+b,0)/nets.length : 0);
 }
 function resetResult(){
   $("status").className="status neutral";

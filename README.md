@@ -1,9 +1,7 @@
-# MCA CALCULADORA V32
+# MCA CALCULADORA V33
 
-Corrección de acceso:
-- Usuarios y claves quedan embebidos dentro de `index.html`.
-- `base_accesos_editable.csv` sigue siendo la base editable y, si está disponible, reemplaza la lista embebida.
-- El login funciona aunque GitHub Pages todavía tenga cacheado/no disponible el CSV.
-- Acepta usuario o código.
-- `RAULPEREZ / 1234567` y `RP001 / 1234567` están incluidos como ACTIVO.
-- Si existe una sesión vieja inválida, se limpia automáticamente.
+Cambios:
+- Corregido el promedio de Ingreso neto por boleta: si solo existe B1, el promedio es B1; con B1+B2 usa 2; con tres boletas usa 3.
+- Mantiene el cálculo individual de cada boleta.
+- Datos financieros ocupa el ancho completo disponible de la columna izquierda, igual que las secciones 1 y 2.
+- Parámetros del convenio mantiene el costado derecho, con ancho estable y altura alineada visualmente con el bloque de resultados.
