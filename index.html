@@ -271,6 +271,31 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   .cron-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 </style>
+
+<style id="mca-v44-responsive">
+/* V44: el cronograma se calcula internamente; su detalle queda oculto. */
+@media (max-width: 900px){
+  body{overflow-x:hidden}
+  .container,.page,.main-container{width:100%!important;max-width:100%!important}
+  .grid,.main-grid,.content-grid{grid-template-columns:1fr!important}
+  .card{min-width:0!important}
+  input,select,button,textarea{max-width:100%;box-sizing:border-box}
+}
+@media (max-width: 640px){
+  body{font-size:14px}
+  header{padding:12px 14px!important}
+  .header,.topbar{flex-wrap:wrap!important;height:auto!important;gap:10px!important}
+  .header img,.topbar img{max-width:42vw!important;height:auto!important}
+  .card{padding:12px!important}
+  .grid-2,.grid-3,.grid-4,.form-grid,.result-grid{grid-template-columns:1fr!important}
+  .result-card{position:static!important}
+  .input-row,.field-row{display:grid!important;grid-template-columns:1fr!important}
+  .financial-table{display:block;overflow-x:auto}
+  .financial-table table{min-width:620px}
+  .debts-table{display:block;overflow-x:auto}
+  .debts-table table{min-width:760px}
+}
+</style>
 </head>
 <body>
 <header><div class="head">
@@ -368,7 +393,7 @@ esultado calculado automáticamente según RCI, facultativos y provisión del co
 
 </div></div></div></div></div></main>
 
-<section class="cronograma-section">
+<section class="cronograma-section" style="display:none!important">
   <div class="card">
     <div class="cron-head">
       <div>
@@ -864,7 +889,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-   MODELO V43 — réplica del cronograma mostrado por el usuario.
+   MODELO V44 — réplica del cronograma mostrado por el usuario.
 
    1. Fecha de desembolso + corte + vencimiento determinan el primer periodo
       de gracia.
