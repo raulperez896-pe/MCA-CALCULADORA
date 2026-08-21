@@ -1,9 +1,7 @@
-# MCA CALCULADORA V54
+# MCA CALCULADORA V55
 
-Correcciones:
-- La Cuota Nueva de la pantalla principal se sincroniza con el Total a Pagar constante del cronograma.
-- Se corrigió el motivo por el que el cronograma aparecía vacío: el motor V53 escribía en IDs de la versión anterior que ya no existían en la nueva hoja.
-- Al abrir el cronograma se vuelve a generar la tabla explícitamente con los datos actuales.
-- Se conserva el motor de cálculo que reproduce la cuota de referencia.
-- Eliminado el texto "resultado calculado automáticamente según RCI, facultativos y provisión del convenio."
-- Se conserva el botón de impresión y los campos editables del cronograma.
+Corrección principal:
+- El cronograma ahora genera TODAS las cuotas. En V54 el motor se detenía después de la primera cuota por una variable `const totalCuota` que se intentaba incrementar.
+- La cuota constante vuelve a llegar a la pantalla principal porque `renderCronograma()` completa correctamente.
+- La distribución de los datos del cronograma se ajustó para seguir la hoja Cronograma base: convenio/cargo/cargo especial, tasas a la derecha, cuotas y gracia, datos del cliente, seguro, TEA/TCEA, fechas y cuota máxima.
+- Se mantiene el botón de impresión.

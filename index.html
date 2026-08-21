@@ -273,7 +273,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v44-responsive">
-/* V54: el cronograma se calcula internamente; su detalle queda oculto. */
+/* V55: el cronograma se calcula internamente; su detalle queda oculto. */
 @media (max-width: 900px){
   body{overflow-x:hidden}
   .container,.page,.main-container{width:100%!important;max-width:100%!important}
@@ -364,7 +364,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 @media(max-width:900px){.cron-table-wrap{max-height:60vh;min-height:260px}.cron-base-notes{font-size:10px}}
 </style>
 <style id="mca-v52-excel-cron">
-/* V54 — visual de la hoja Cronograma de la calculadora base */
+/* V55 — visual de la hoja Cronograma de la calculadora base */
 #cronogramaView{
   font-family:Roboto,Arial,sans-serif!important;
   color:#202428;
@@ -713,6 +713,82 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   .cron-base-table th,.cron-base-table td{font-size:9px!important;padding:2px!important}
   .cron-notes{font-size:8.5px!important}
   .cron-blue-title{font-size:14px!important}
+}
+</style>
+
+<style id="mca-v55-base-layout">
+/* V55 - distribución tipo hoja Cronograma de Excel */
+#cronogramaView .cron-sheet{
+  max-width:1180px;
+  padding:10px 14px 24px;
+}
+#cronogramaView .cron-data-grid{
+  display:grid;
+  grid-template-columns: 1.05fr 1.05fr .95fr 1.05fr;
+  grid-auto-rows:minmax(34px,auto);
+  gap:6px 10px;
+  align-items:start;
+}
+#cronogramaView .cron-field{min-height:34px}
+#cronogramaView .cron-field label{
+  font-size:12px;
+  margin:0 0 3px 2px;
+}
+#cronogramaView .sheet-value,
+#cronogramaView .sheet-input{
+  min-height:24px;
+  font-size:12px;
+  padding:4px 6px;
+  border-radius:0;
+  text-align:left;
+}
+#cronogramaView .convenio-field{grid-column:1;grid-row:1}
+#cronogramaView .cargo-field{grid-column:2 / span 2;grid-row:1}
+#cronogramaView .special-field{grid-column:1 / span 3;grid-row:2}
+#cronogramaView .rates-field{grid-column:4;grid-row:1 / span 3}
+#cronogramaView .cuotas-field{grid-column:1;grid-row:3}
+#cronogramaView .gracia-field{grid-column:2;grid-row:3}
+#cronogramaView .editable-field{grid-column:1;grid-row:4}
+#cronogramaView .duration-field{grid-column:2;grid-row:4}
+#cronogramaView .cron-field:nth-of-type(8){grid-column:3;grid-row:4}
+#cronogramaView .cron-field:nth-of-type(9){grid-column:1;grid-row:5}
+#cronogramaView .insurance-field{grid-column:2;grid-row:5}
+#cronogramaView .cron-field:nth-of-type(11){grid-column:3;grid-row:5}
+#cronogramaView .cron-field:nth-of-type(12){grid-column:1;grid-row:6}
+#cronogramaView .cron-field:nth-of-type(13){grid-column:2;grid-row:6}
+#cronogramaView .cron-field:nth-of-type(14){grid-column:3;grid-row:6}
+#cronogramaView .cron-field:nth-of-type(15){grid-column:1;grid-row:7}
+#cronogramaView .cron-field:nth-of-type(16){grid-column:2;grid-row:7}
+#cronogramaView .cron-field:nth-of-type(17){grid-column:3;grid-row:7}
+#cronogramaView .cron-field:nth-of-type(18){grid-column:1;grid-row:8}
+#cronogramaView .cron-field:nth-of-type(19){grid-column:2;grid-row:8}
+#cronogramaView .cron-field:nth-of-type(20){grid-column:3;grid-row:8}
+#cronogramaView .cron-blue-title{
+  margin-top:8px;
+  font-size:18px;
+  padding:6px 8px;
+}
+#cronogramaView .cron-base-table{
+  min-width:0;
+  width:100%;
+  font-size:11px;
+}
+#cronogramaView .cron-base-table th{
+  height:40px;
+}
+#cronogramaView .cron-base-table td{
+  height:20px;
+}
+@media(max-width:850px){
+  #cronogramaView .cron-data-grid{grid-template-columns:1fr 1fr}
+  #cronogramaView .rates-field,
+  #cronogramaView .convenio-field,#cronogramaView .cargo-field,
+  #cronogramaView .special-field,#cronogramaView .cuotas-field,
+  #cronogramaView .gracia-field,#cronogramaView .editable-field,
+  #cronogramaView .duration-field,
+  #cronogramaView .cron-field:nth-of-type(n){
+    grid-column:auto;grid-row:auto;
+  }
 }
 </style>
 </head>
@@ -1400,7 +1476,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-    MOTOR V54 — replica la hoja "Cronograma" de la calculadora base.
+    MOTOR V55 — replica la hoja "Cronograma" de la calculadora base.
 
     TED = (1 + TEA)^(1/360) - 1
 
@@ -1517,7 +1593,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   // TCEA de referencia usando la tasa diaria efectiva.
   const tcea=Math.pow(1+ted, (plazo+graceN)*30)-1;
 
-  // La V54 cambió los IDs visuales de la hoja. Escribimos en los
+  // La V55 cambió los IDs visuales de la hoja. Escribimos en los
   // campos nuevos y, si existen, también en los IDs antiguos.
   const cronSet=(ids,v)=>{
     (Array.isArray(ids)?ids:[ids]).forEach(id=>{
@@ -1577,8 +1653,8 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   periods.forEach((period,i)=>{
     const interes=saldo*period.h;
     const seguroMonto=saldo*period.insuranceFactor;
-    const totalCuota=cuotaConstante-seguroMonto;
-    const amort=Math.max(0,totalCuota-interes);
+    const cuotaPeriodo=cuotaConstante-seguroMonto;
+    const amort=Math.max(0,cuotaPeriodo-interes);
     const saldoFinal=Math.max(0,saldo-amort);
 
     const tr=document.createElement("tr");
@@ -1586,7 +1662,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
       i+1,fmtDate(period.due),money2(saldo),
       "("+money2(amort).replace("S/ ","")+")",
       money2(interes),"S/ 0.00",
-      money2(totalCuota),money2(seguroMonto),money2(totalCuota+seguroMonto)
+      money2(cuotaPeriodo),money2(seguroMonto),money2(cuotaPeriodo+seguroMonto)
     ];
     vals.forEach(v=>{
       const td=document.createElement("td");
@@ -1598,9 +1674,9 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
     totalAmort+=amort;
     totalInteres+=interes;
     totalCom+=0;
-    totalCuota+=totalCuota;
+    totalCuota+=cuotaPeriodo;
     totalSeguro+=seguroMonto;
-    totalPagar+=totalCuota+seguroMonto;
+    totalPagar+=cuotaPeriodo+seguroMonto;
     saldo=saldoFinal;
   });
 
@@ -1616,6 +1692,10 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
     totalTr.appendChild(td);
   });
   body.appendChild(totalTr);
+
+  if($("cronStatus")){
+    $("cronStatus").textContent=`Cronograma actualizado · ${periods.length} cuotas`;
+  }
 
   return {
     creditPayment:firstTotalCuota,
