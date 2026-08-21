@@ -1,13 +1,9 @@
-# MCA CALCULADORA V27
+# MCA CALCULADORA V28
 
-Se agregó una tabla dinámica de deudas de otros bancos basada en la hoja BANCOS de `CUADRO DE COMPRA DE DEUDA 2.xlsx`.
-
-- Entidades cargadas: 102
-- Entidad: lista desplegable.
-- Tipo: PLD, CONVENIO, VEHICULAR, HIPOTECARIO, TARJETA DE CREDITO.
-- Monto deuda / línea: informativo.
-- Cuota mensual: afecta el endeudamiento.
-- Se pueden agregar múltiples deudas.
-- No se aplica ningún porcentaje sobre la línea utilizada/no utilizada.
-
-Se mantienen las demás funciones de la calculadora.
+Cambios:
+- Eliminadas las cuotas fijas de Consumo, Vehicular, Hipotecaria y Tarjeta BBVA.
+- Eliminado Otros descuentos / obligaciones.
+- Parámetros del convenio ahora están al costado de Datos financieros.
+- Sección 4 Deudas y obligaciones mensuales ocupa todo el ancho inferior.
+- Se mantienen las deudas dinámicas por banco, producto, monto y cuota mensual.
+- El endeudamiento usa las cuotas mensuales de la tabla dinámica + la nueva cuota.

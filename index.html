@@ -74,6 +74,16 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 .debt-remove{border:1px solid #d95c5c;background:#fff;color:#b42318;border-radius:7px;padding:8px 10px;cursor:pointer}
 .add-debt-btn{margin-top:9px;border:0;border-radius:8px;padding:9px 14px;background:#062b55;color:#fff;font-weight:700;cursor:pointer}
 @media(max-width:900px){.debt-table{min-width:780px}}
+</style><style id="layout-v28">
+.financial-param-wrap{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:16px;align-items:start}
+.financial-param-wrap>.card{margin-bottom:0}
+.debt-full{grid-column:1/-1}
+.debt-full>.card{margin-bottom:0}
+.debt-full .debt-table-wrap{max-height:none;overflow-x:auto}
+.debt-full .debt-table{min-width:900px}
+.debt-full .debt-table th{white-space:nowrap}
+@media(max-width:1100px){.financial-param-wrap{grid-template-columns:1fr}}
+@media(max-width:900px){.debt-full .debt-table{min-width:760px}}
 </style></head>
 <body>
 <header><div class="head">
@@ -119,7 +129,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 
 </div></div>
 
-<div class="card"><h2>3. Datos financieros (3 últimas boletas)</h2>
+<div class="financial-param-wrap"><div class="financial-card"><div class="card"><h2>3. Datos financieros (3 últimas boletas)</h2>
 <div class="hint">Los promedios se actualizan automáticamente al escribir en cualquier casillero.</div>
 <div class="scroll"><table>
 <thead><tr><th>Concepto</th><th>Boleta 1</th><th>Boleta 2</th><th>Boleta 3</th><th>Promedio</th></tr></thead>
@@ -132,28 +142,9 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 <tr><td>Facultativo</td><td><input id="fa1" type="number" value="" min="0"></td><td><input id="fa2" type="number" value="" min="0"></td><td><input id="fa3" type="number" value="" min="0"></td><td id="fap">S/ 0.00</td></tr>
 </tbody>
 <tfoot><tr><td><b>Ingreso neto por boleta</b></td><td id="n1">S/ 0.00</td><td id="n2">S/ 0.00</td><td id="n3">S/ 0.00</td><td id="np">S/ 0.00</td></tr></tfoot>
-</table></div></div>
+</table></div></div></div><div class="card"><h2>Parámetros del convenio</h2><div id="params" class="paramgrid"></div><div id="anti" class="info" style="margin-top:9px">Selecciona un perfil.</div></div></div>
 
-<div class="card"><h2>4. Deudas y obligaciones mensuales</h2>
-<div class="grid2">
-<div><label>Cuota Consumo BBVA</label><input id="dbcons" type="number" value="" min="0"></div>
-<div><label>Cuota Vehicular BBVA</label><input id="dbveh" type="number" value="" min="0"></div>
-<div><label>Cuota Hipotecaria BBVA</label><input id="dbhip" type="number" value="" min="0"></div>
-<div><label>Cuota Tarjeta BBVA</label><input id="dbtc" type="number" value="" min="0"></div>
 
-<div class="full-width debt-section">
-<label style="margin-bottom:8px;display:block">Deudas / obligaciones de otros bancos</label>
-<div class="debt-table-wrap">
-<table class="debt-table">
-<thead><tr><th>Entidad</th><th>Tipo de producto</th><th>Monto deuda / línea (S/.)</th><th>Cuota mensual (S/.)</th><th></th></tr></thead>
-<tbody id="otherDebtsBody"></tbody>
-</table>
-</div>
-<button type="button" id="addDebtBtn" class="add-debt-btn">+ Agregar deuda</button>
-</div>
-
-<div><label>Otros descuentos / obligaciones</label><input id="otros" type="number" value="" min="0"></div>
-</div></div>
 </section>
 
 <section>
@@ -169,10 +160,23 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 esultado calculado automáticamente según RCI, facultativos y provisión del convenio.</small></div>
 </div>
 
-<div class="card"><h2>Parámetros del convenio</h2><div id="params" class="paramgrid"></div><div id="anti" class="info" style="margin-top:9px">Selecciona un perfil.</div></div>
+
 
 <div class="card"><h2>Consideraciones del convenio</h2><textarea id="gen" readonly></textarea><h2 style="margin-top:12px">Condiciones específicas</h2><textarea id="esp" readonly></textarea></div>
-</section></div></div></main>
+</section><div class="debt-full"><div class="card"><h2>4. Deudas y obligaciones mensuales</h2>
+<div class="grid2">
+<div class="full-width debt-section">
+<label style="margin-bottom:8px;display:block">Deudas / obligaciones de otros bancos</label>
+<div class="debt-table-wrap">
+<table class="debt-table">
+<thead><tr><th>Entidad</th><th>Tipo de producto</th><th>Monto deuda / línea (S/.)</th><th>Cuota mensual (S/.)</th><th></th></tr></thead>
+<tbody id="otherDebtsBody"></tbody>
+</table>
+</div>
+<button type="button" id="addDebtBtn" class="add-debt-btn">+ Agregar deuda</button>
+</div>
+
+</div></div></div></div></div></main>
 <footer>MCA CALCULADORA · Resultado referencial sujeto a políticas y evaluación del Banco.</footer>
 
 <script>
@@ -518,9 +522,7 @@ function calc(){
   const provision=parseMoney(r["Provisión"]);
   const cuotaMaxima=Math.max(0,baseRCI*rci-facult-provision);
   const cuota=tea?monto*factor(tea,plazo):0;
-  const deudas=
-    num("dbcons")+num("dbveh")+num("dbhip")+num("dbtc")+
-    totalOtherBankQuotas()+num("otros");
+  const deudas=totalOtherBankQuotas();
   const globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley);
   const limite=edad>60?parsePct(r["Endeudamiento máximo \n(+ 60 años)"]):parsePct(r["Endeudamiento máximo \n(- 60 años)"]);
   const end=globalBase?(deudas+cuota)/globalBase:0;
