@@ -737,21 +737,21 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 #cronogramaView .rates-field{grid-column:4;grid-row:2}
 #cronogramaView .special-field{grid-column:1;grid-row:2}
 #cronogramaView .cuotas-field{grid-column:1;grid-row:3}
+#cronogramaView .gracia-field{grid-column:2;grid-row:3}
 #cronogramaView .rates-sin-field{grid-column:4;grid-row:3 / span 2}
 #cronogramaView .editable-field{grid-column:1;grid-row:4}
-#cronogramaView .gracia-field{grid-column:2;grid-row:3}
-#cronogramaView .insurance-field{grid-column:2;grid-row:4}
+#cronogramaView .duration-field{grid-column:2;grid-row:4}
 #cronogramaView .solicitud-field{grid-column:4;grid-row:4}
 #cronogramaView .dni-field{grid-column:1;grid-row:5}
-#cronogramaView .duration-field{grid-column:2;grid-row:4}
-#cronogramaView .seguro-importe-field{grid-column:2;grid-row:5}
+#cronogramaView .insurance-field{grid-column:2;grid-row:5}
 #cronogramaView .corte-field{grid-column:4;grid-row:5}
 #cronogramaView .monto-field{grid-column:1;grid-row:6}
-#cronogramaView .tea-field{grid-column:1;grid-row:7}
-#cronogramaView .tcea-field{grid-column:2;grid-row:6}
+#cronogramaView .seguro-importe-field{grid-column:2;grid-row:6}
 #cronogramaView .pago-field{grid-column:4;grid-row:6}
-#cronogramaView .desembolso-field{grid-column:1;grid-row:8}
+#cronogramaView .tea-field{grid-column:1;grid-row:7}
+#cronogramaView .tcea-field{grid-column:2;grid-row:7}
 #cronogramaView .primer-field{grid-column:4;grid-row:7}
+#cronogramaView .desembolso-field{grid-column:1;grid-row:8}
 #cronogramaView .qmax-field{grid-column:4;grid-row:8}
 #cronogramaView .second-rate-label{display:none}
 
@@ -774,6 +774,16 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 #cronogramaView .cron-last-summary-row td:first-child{background:#f7d99f;font-weight:700}
 #cronogramaView .cron-total-row td{font-weight:700;border-top:2px solid #333}
 #cronogramaView .cron-base-table th,#cronogramaView .cron-base-table td{white-space:nowrap}
+</style>
+<style id="mca-v62-final-layout">
+#cronogramaView .cron-data-grid{grid-auto-rows:minmax(38px,auto);row-gap:7px}
+#cronogramaView .cron-notes{margin-top:28px!important;padding-bottom:18px!important;min-height:330px!important}
+#cronogramaView .cron-signature{margin:115px 0 0 18px!important;width:220px!important;text-align:center!important}
+#cronogramaView .cron-ellipsis-row td{height:14px!important;padding:0!important}
+@media print{
+#cronogramaView .cron-notes{min-height:330px!important;padding-bottom:10mm!important}
+#cronogramaView .cron-signature{margin-top:115px!important;margin-left:12px!important}
+}
 </style>
 </head>
 <body>
@@ -1629,8 +1639,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
     const vals=[
       "—",fmtDate(accrualStart),money2(monto),
       "("+money2(graceInterest).replace("S/ ","")+")",
-      money2(graceInterest),"S/ 0.00",
-      money2(graceInterest),"S/ 0.00",money2(graceInterest)
+      money2(graceInterest),"","","",""
     ];
     vals.forEach(v=>{ const td=document.createElement("td"); td.textContent=v; tr.appendChild(td); });
     body.appendChild(tr);
