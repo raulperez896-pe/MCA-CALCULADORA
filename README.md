@@ -1,15 +1,13 @@
-# MCA CALCULADORA V22
+# MCA CALCULADORA V23
 
-Corrección del acceso de promotores.
+## Autollenado de boletas
 
-### Acceso de Raul Perez
-- Código: `RP001`
-- Usuario: `RAULPEREZ`
-- Contraseña: `1234567`
-- Estado: ACTIVO
+Al ingresar el **Ingreso Variable** en Boleta 2 o Boleta 3, se copian automáticamente desde Boleta 1:
+- Ingreso Fijo
+- No constante
+- Descuento de Ley
+- Facultativo
 
-El login acepta indistintamente **Código o usuario**.
+El **Ingreso Variable** de Boleta 2 y Boleta 3 se mantiene independiente.
 
-Se corrigió el problema por el cual la base de accesos se estaba intentando leer con el parser de la base de convenios. Ahora `base_accesos_editable.csv` tiene su propio parser.
-
-No existe usuario demo de respaldo si la base de accesos no carga.
+El autollenado se activa al escribir, cambiar o salir del campo de Ingreso Variable y después recalcula la tabla y la simulación.

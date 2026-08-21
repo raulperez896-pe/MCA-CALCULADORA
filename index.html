@@ -277,6 +277,41 @@ function avg(ids){
   return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
 }
 function setMoney(id,v){const el=$(id);if(el)el.textContent=money(v);}
+
+// Autollenado automático de Boletas 2 y 3.
+// Al ingresar Ingreso Variable en B2 o B3, copia desde B1:
+// Ingreso Fijo, No constante, Descuento de Ley y Facultativo.
+// El Ingreso Variable de cada boleta permanece independiente.
+function replicateBoletaFrom1(n){
+  if(n!==2 && n!==3) return;
+  const variable=$("v"+n);
+  if(!variable || String(variable.value??"").trim()==="") return;
+
+  ["f","nc","l","fa"].forEach(prefix=>{
+    const source=$(prefix+"1");
+    const target=$(prefix+n);
+    if(source && target && String(source.value??"").trim()!==""){
+      target.value=source.value;
+    }
+  });
+}
+
+function installAutoReplicate(){
+  [2,3].forEach(n=>{
+    const el=$("v"+n);
+    if(!el) return;
+    ["input","change","blur"].forEach(evt=>{
+      el.addEventListener(evt,()=>{
+        if(String(el.value??"").trim()!==""){
+          replicateBoletaFrom1(n);
+          calculateFinancialTable();
+          calc();
+        }
+      });
+    });
+  });
+}
+
 function calculateFinancialTable(){
   const rows=[
     ["f1","f2","f3","fp"],["v1","v2","v3","vp"],["nc1","nc2","nc3","ncp"],
@@ -410,6 +445,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       x.addEventListener("change",calc);
       x.addEventListener("keyup",calc);
     });
+    installAutoReplicate();
     DATA=FALLBACK;
     init();
     // The CSV is optional: it only updates the internal base after the page is already usable.
