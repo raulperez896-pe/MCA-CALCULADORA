@@ -273,7 +273,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v44-responsive">
-/* V45: el cronograma se calcula internamente; su detalle queda oculto. */
+/* V46: el cronograma se calcula internamente; su detalle queda oculto. */
 @media (max-width: 900px){
   body{overflow-x:hidden}
   .container,.page,.main-container{width:100%!important;max-width:100%!important}
@@ -302,6 +302,10 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 .result-box span{display:block;font-size:10px;color:#5c6f86;font-weight:700}
 .result-box strong{display:block;font-size:18px;margin-top:4px}
 @media(max-width:640px){.result-box{width:100%;box-sizing:border-box}}
+</style>
+
+<style id="mca-v46-maxterm">
+#plazoMaximoHint{display:block;margin-top:5px;font-size:10px;color:#64748b}
 </style>
 </head>
 <body>
@@ -342,7 +346,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 
 <div class="card"><h2>2. Datos del cliente y solicitud</h2>
 <div class="grid">
-<div><label>Fecha de nacimiento</label><input type="date" id="fechaNacimiento" type="number" min="18" max="100"></div>
+<div><label>Fecha de nacimiento</label><input type="date" id="fechaNacimiento"></div>
 <div><label>Fecha de desembolso</label><input id="fechaDesembolso" type="date" aria-label="Fecha de desembolso"></div>
 <div><label>Monto solicitado (S/.)</label><input id="monto" type="number" min="0" step="100"></div>
 <div><label>Plazo (meses)</label><input id="plazo" type="number" min="1" max="120" value="60"></div>
@@ -379,7 +383,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 
 <div class="result-box">
   <span>PLAZO MÁXIMO</span>
-  <strong id="plazoMaximoResultado">—</strong>
+  <strong id="plazoMaximoResultado">—</strong><small id="plazoMaximoHint">Calculado según edad máxima del convenio</small>
 </div>
 <div id="status" class="status neutral">Selecciona convenio, cargo y condición</div><div id="alerts"></div>
 esultado calculado automáticamente según RCI, facultativos y provisión del convenio.</small></div>
@@ -901,7 +905,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-   MODELO V45 — réplica del cronograma mostrado por el usuario.
+   MODELO V46 — réplica del cronograma mostrado por el usuario.
 
    1. Fecha de desembolso + corte + vencimiento determinan el primer periodo
       de gracia.
@@ -1124,25 +1128,43 @@ function actualizarPlazoMaximo(){
   const out=$("plazoMaximoResultado");
   if(!dob||!out)return null;
 
-  // Find age maximum from the currently selected profile.
-  const convenio=$("convenio")?.value;
-  const cargo=$("cargo")?.value;
-  const condicion=$("condicion")?.value;
+  // Use the exact profile selected by the existing calculator.
+  // The real IDs are conv / cargo / cond and the profile resolver is current().
   let r=null;
   try{
-    if(typeof findProfile==="function")r=findProfile(convenio,cargo,condicion);
-  }catch(e){}
-  if(!r && typeof currentProfile!=="undefined")r=currentProfile;
+    if(typeof current==="function") r=current();
+  }catch(e){
+    console.warn("MCA: no se pudo obtener perfil para plazo máximo",e);
+  }
 
-  const edadMax=parseNumLoose(r?.["Edad máxima"] ?? r?.["Edad maxima"] ?? r?.["Edad Máxima"]);
-  const max=calcularPlazoMaximo(dob.value,desemb?.value,edadMax);
+  const edadMax=parseNumLoose(
+    r?.["Edad máxima"] ??
+    r?.["Edad maxima"] ??
+    r?.["Edad Máxima"] ??
+    r?.["Edad máxima permitida"] ??
+    r?.["Edad Maxima"]
+  );
+
+  const max=calcularPlazoMaximo(
+    dob.value,
+    desemb?.value,
+    edadMax
+  );
+
   if(max===null){
     out.textContent="—";
     return null;
   }
+
+  if(max<=0){
+    out.textContent="NO OTORGABLE";
+    return 0;
+  }
+
   out.textContent=max+" meses";
   return max;
 }
+
 
 function calc(){
   calculateFinancialTable();
@@ -1159,7 +1181,18 @@ function calc(){
     }
     return;
   }
-  const b=$("buro")?.value||"",edad=num("edad"),plazo=num("plazo"),monto=num("monto"),seguro=$("seguro")?.value||"",fechaDesembolso=$("fechaDesembolso")?.value||"";
+  const b=$("buro")?.value||"",plazo=num("plazo"),monto=num("monto"),seguro=$("seguro")?.value||"",fechaDesembolso=$("fechaDesembolso")?.value||"";
+
+  const fechaNac=$("fechaNacimiento")?.value||"";
+  const fechaNacObj=parseInputDate(fechaNac);
+  const fechaDesObj=parseInputDate(fechaDesembolso);
+  let edad=0;
+  if(fechaNacObj && fechaDesObj){
+    edad=fechaDesObj.getFullYear()-fechaNacObj.getFullYear()
+      - ((fechaDesObj.getMonth()<fechaNacObj.getMonth() ||
+          (fechaDesObj.getMonth()===fechaNacObj.getMonth() && fechaDesObj.getDate()<fechaNacObj.getDate()))?1:0);
+  }
+  const plazoMaximo=actualizarPlazoMaximo();
   const tea=rateFrom(seguro==="Sin seguro"?r["Tasa Sin Seguro"]:r["Tasa Con Seguro"],b);
   const fi=avg(["f1","f2","f3"]),va=avg(["v1","v2","v3"]),nc=avg(["nc1","nc2","nc3"]),ad=avg(["ad1","ad2","ad3"]),ley=avg(["l1","l2","l3"]),facult=avg(["fa1","fa2","fa3"]);
   const variablePct=parsePct(r["% Ingreso variable"]);
@@ -1334,14 +1367,11 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 });
 
-["fechaNacimiento","fechaDesembolso","convenio","cargo","condicion"].forEach(id=>{
-  const el=$(id);
-  if(el)el.addEventListener("change",()=>setTimeout(actualizarPlazoMaximo,0));
-});
+["fechaNacimiento","fechaDesembolso","conv","cargo","cond"].forEach(id=>{ const el=$(id); if(el)el.addEventListener("change",()=>setTimeout(actualizarPlazoMaximo,50)); });
 
 document.addEventListener("change",function(e){
-  if(["convenio","cargo","condicion","fechaNacimiento","fechaDesembolso"].includes(e.target?.id)){
+  if(["conv","cargo","cond","fechaNacimiento","fechaDesembolso"].includes(e.target?.id)){
     setTimeout(actualizarPlazoMaximo,50);
   }
 });
-</script>
+window.addEventListener("load",()=>setTimeout(actualizarPlazoMaximo,100));</script>
