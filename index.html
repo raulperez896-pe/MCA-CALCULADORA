@@ -273,7 +273,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v44-responsive">
-/* V52: el cronograma se calcula internamente; su detalle queda oculto. */
+/* V53: el cronograma se calcula internamente; su detalle queda oculto. */
 @media (max-width: 900px){
   body{overflow-x:hidden}
   .container,.page,.main-container{width:100%!important;max-width:100%!important}
@@ -364,7 +364,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 @media(max-width:900px){.cron-table-wrap{max-height:60vh;min-height:260px}.cron-base-notes{font-size:10px}}
 </style>
 <style id="mca-v52-excel-cron">
-/* V52 — visual de la hoja Cronograma de la calculadora base */
+/* V53 — visual de la hoja Cronograma de la calculadora base */
 #cronogramaView{
   font-family:Roboto,Arial,sans-serif!important;
   color:#202428;
@@ -519,6 +519,202 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   #cronogramaView .cron-table-wrap{max-height:60vh!important}
 }
 </style>
+
+<style id="mca-v53-cron-sheet">
+#cronogramaView{
+  background:#fff!important;
+  color:#111!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+}
+#cronogramaView .cron-sheet{
+  width:100%;
+  max-width:1180px;
+  margin:0 auto;
+  box-sizing:border-box;
+  background:#fff;
+  border:1px solid #a9a9a9;
+  padding:14px 16px 26px;
+}
+.cron-sheet-toolbar{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-bottom:10px;
+}
+.cron-back-btn,.cron-print-btn{
+  border:1px solid #8ea5bd;
+  background:#fff;
+  color:#003399;
+  border-radius:3px;
+  padding:6px 10px;
+  font-size:11px;
+  cursor:pointer;
+}
+.cron-print-btn{
+  background:#003399;
+  color:#fff;
+  border-color:#003399;
+  font-weight:700;
+}
+.cron-sheet-header{
+  background:#dce8f8;
+  color:#003399;
+  height:28px;
+  display:flex;
+  align-items:center;
+  padding:0 7px;
+  box-sizing:border-box;
+  margin-bottom:10px;
+}
+.sheet-brand{display:none}
+.sheet-title{
+  text-decoration:underline;
+  font-weight:700;
+  font-size:14px;
+}
+.cron-data-grid{
+  display:grid;
+  grid-template-columns:1.15fr 1.15fr .95fr 1.15fr;
+  gap:7px 10px;
+  border:0;
+}
+.cron-field{
+  min-height:35px;
+  position:relative;
+}
+.cron-field label{
+  display:block;
+  font-weight:700;
+  font-size:12px;
+  margin:0 0 3px 2px;
+  color:#111;
+}
+.sheet-value,.sheet-input{
+  box-sizing:border-box;
+  width:100%;
+  min-height:24px;
+  border:1px solid #b9c2cc;
+  background:#edf0f3;
+  padding:4px 6px;
+  font-size:12px;
+  color:#444;
+  border-radius:0;
+}
+.sheet-input{
+  background:#fff;
+  outline:none;
+}
+.sheet-input:focus{border-color:#003399;box-shadow:inset 0 0 0 1px #003399}
+.multiline{min-height:45px;white-space:pre-line;text-align:center}
+.rates-field{grid-column:4;grid-row:1 / span 3}
+.convenio-field{grid-column:1;grid-row:1}
+.cargo-field{grid-column:2;grid-row:1}
+.special-field{grid-column:3;grid-row:1}
+.cuotas-field{grid-column:1;grid-row:2}
+.gracia-field{grid-column:2;grid-row:2}
+.editable-field{grid-column:1;grid-row:3}
+.duration-field{grid-column:2;grid-row:3}
+.cron-field{} 
+.second-rate-label{margin-top:7px!important}
+.orange-label{background:#ffe6c2;font-weight:700}
+.inline-values{display:grid;grid-template-columns:1fr 1.4fr;gap:0}
+.inline-values .sheet-value{min-height:31px}
+.cron-blue-title{
+  margin-top:9px;
+  background:#001c9a;
+  color:#fff;
+  font-weight:700;
+  font-size:18px;
+  text-align:center;
+  padding:6px 8px;
+  letter-spacing:.1px;
+}
+.cron-table-wrap{
+  width:100%;
+  overflow:auto;
+  border:0;
+  margin-top:0;
+}
+.cron-base-table{
+  width:100%;
+  min-width:930px;
+  border-collapse:collapse;
+  table-layout:fixed;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:11px;
+  color:#111;
+}
+.cron-base-table th{
+  background:#f1f1f1!important;
+  color:#111!important;
+  border:1px solid #aeb4bb!important;
+  padding:5px 3px!important;
+  text-align:center!important;
+  font-weight:700!important;
+  line-height:1.05!important;
+  white-space:normal!important;
+}
+.cron-base-table td{
+  border:0!important;
+  padding:3px 5px!important;
+  background:#fff!important;
+  color:#111!important;
+  text-align:right!important;
+  white-space:nowrap!important;
+  line-height:1.1!important;
+}
+.cron-base-table td:nth-child(1),.cron-base-table td:nth-child(2){text-align:center!important}
+.cron-base-table tr.grace-row td{background:#fffaf0!important}
+.cron-base-table tr.cron-total-row td{
+  border-top:1px solid #777!important;
+  font-weight:700!important;
+}
+.cron-notes{
+  margin:20px 6px 0;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:10px;
+  line-height:1.2;
+  color:#111;
+}
+.cron-notes p{margin:0 0 6px}
+.cron-signature{
+  margin:30px 0 0 40px;
+  width:200px;
+  text-align:center;
+  font-size:10px;
+}
+@media(max-width:850px){
+  .cron-data-grid{grid-template-columns:1fr 1fr}
+  .rates-field{grid-column:auto;grid-row:auto}
+  .convenio-field,.cargo-field,.special-field,.cuotas-field,.gracia-field,.editable-field,.duration-field{grid-column:auto;grid-row:auto}
+  .cron-blue-title{font-size:15px}
+}
+@media print{
+  body{background:#fff!important}
+  body>*:not(#cronogramaView){display:none!important}
+  #cronogramaView{
+    display:block!important;
+    position:static!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    background:#fff!important;
+  }
+  #cronogramaView .cron-sheet{
+    max-width:none!important;
+    width:100%!important;
+    border:1px solid #888!important;
+    padding:10mm 8mm 12mm!important;
+    margin:0!important;
+  }
+  .no-print{display:none!important}
+  .cron-table-wrap{overflow:visible!important}
+  .cron-base-table{min-width:0!important;font-size:9px!important}
+  .cron-base-table th,.cron-base-table td{font-size:9px!important;padding:2px!important}
+  .cron-notes{font-size:8.5px!important}
+  .cron-blue-title{font-size:14px!important}
+}
+</style>
 </head>
 <body>
 <header><div class="head">
@@ -633,48 +829,108 @@ esultado calculado automáticamente según RCI, facultativos y provisión del co
 </main>
 
 <section class="cronograma-section cron-view-hidden" id="cronogramaView">
-  <div class="card">
-    
-<div class="cron-page-head">
-  <div>
-    <h2>5. Cronograma de simulación</h2>
-    <p class="cron-sub">CRONOGRAMA DE PAGO PRELIMINAR “PRÉSTAMO POR CONVENIO”</p>
-  </div>
-  <div class="cron-page-actions">
-    <button type="button" class="mca-back" id="backCalculadoraBtn">← VOLVER A CALCULADORA</button>
-  </div>
-</div>
-<div class="cron-summary">
-      <div><span>Fecha de desembolso</span><strong id="cronDesembolso">—</strong></div>
-      <div><span>Días de gracia</span><strong id="cronDiasGracia">0 días</strong></div>
-      <div><span>Monto Principal Solicitado (S/.)</span><strong id="cronMonto">S/ 0.00</strong></div>
-      <div><span>Tasa Efectiva Anual (%)</span><strong id="cronTasa">0.00%</strong></div>
-      <div><span>Duración total (plazo + gracia)</span><strong id="cronPlazo">0 meses</strong></div>
-      <div><span>Fecha de corte (día)</span><strong id="cronCorte">—</strong></div>
-      <div><span>Día de vencimiento (día)</span><strong id="cronPago">—</strong></div>
-      <div><span>Periodo de gracia</span><strong id="cronGracia">0 meses</strong></div>
-      <div><span>Seg. Desgrav. (%)</span><strong id="cronSeguro">—</strong></div>
-      <div><span>Seg. Desgrav. (%)</span><strong id="cronSeguroPct">0.00%</strong></div>
-      <div><span>Cuota máxima (S/.)</span><strong id="cronCuota">S/ 0.00</strong></div>
-      <div><span>Total a pagar inicial</span><strong id="cronCuotaTotal">S/ 0.00</strong></div>
-      <div><span>Importe Seguro Desgrav. (S/.)</span><strong id="cronSeguroImporte">S/ 0.00</strong></div>
-      <div><span>Primer vencimiento</span><strong id="cronPrimerVencimiento">—</strong></div>
-      <div><span>TCEA Referencial (%)</span><strong id="cronTcea">0.00%</strong></div>
+  <div class="cron-sheet">
+    <div class="cron-sheet-toolbar no-print">
+      <button type="button" class="cron-back-btn" id="backCalculadoraBtn">← VOLVER A CALCULADORA</button>
+      <button type="button" class="cron-print-btn" id="printCronogramaBtn">🖨 IMPRIMIR CRONOGRAMA</button>
     </div>
-    <div class="cron-note" id="cronNote">El cronograma se activa al completar convenio, cargo, condición, seguro, fecha de desembolso, monto y plazo.</div>
+
+    <div class="cron-sheet-header">
+      <div class="sheet-brand">MCA <span>Master Center</span><small>Américas</small></div>
+      <div class="sheet-title">Datos del convenio</div>
+    </div>
+
+    <div class="cron-data-grid">
+      <div class="cron-field convenio-field">
+        <label>Convenio</label><div id="cronConvenio" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field cargo-field">
+        <label>Modalidad/cargo</label><div id="cronCargo" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field special-field">
+        <label>Cargo especial</label><div id="cronEspecial" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field rates-field">
+        <label>Tasa con seguro</label><div id="cronTasaConSeguro" class="sheet-value multiline">—</div>
+        <label class="second-rate-label">Tasa sin seguro</label><div id="cronTasaSinSeguro" class="sheet-value multiline">—</div>
+      </div>
+      <div class="cron-field cuotas-field">
+        <label>Número de cuotas permitidas</label><div id="cronCuotasPermitidas" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field gracia-field">
+        <label>Periodo de gracia</label><div id="cronGracia2" class="sheet-value">—</div>
+      </div>
+
+      <div class="cron-field editable-field">
+        <label>Nombre del cliente:</label>
+        <input id="cronCliente" class="sheet-input" type="text" placeholder="Ingrese nombre">
+      </div>
+      <div class="cron-field duration-field">
+        <label>Duración total (plazo + gracia):</label><div id="cronDuracionTotal" class="sheet-value orange-label">—</div>
+      </div>
+      <div class="cron-field">
+        <label>DNI del cliente:</label>
+        <input id="cronDni" class="sheet-input" type="text" inputmode="numeric" maxlength="12" placeholder="Ingrese DNI">
+      </div>
+      <div class="cron-field insurance-field">
+        <label>Seg. Desgrav. (%)</label>
+        <div class="inline-values"><div id="cronSeguroPct2" class="sheet-value small">—</div><div id="cronSeguroNombre" class="sheet-value">—</div></div>
+      </div>
+      <div class="cron-field">
+        <label>Monto Principal Solicitado (S/.):</label><div id="cronMonto2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field">
+        <label>Importe Seguro Desgrav. (S/.):</label><div id="cronSeguroImporte2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field">
+        <label>Tasa Efectiva Anual (%):</label><div id="cronTasa2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field">
+        <label>TCEA Referencial (%):</label><div id="cronTcea2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field">
+        <label>Fecha de desembolso:</label><div id="cronDesembolso2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field">
+        <label>Fecha de solicitud:</label>
+        <input id="cronSolicitud" class="sheet-input" type="date">
+      </div>
+      <div class="cron-field">
+        <label>Fecha de corte (día):</label><div id="cronCorte2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field">
+        <label>Día de vencimiento (día):</label><div id="cronPago2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field">
+        <label>Primer vencimiento:</label><div id="cronPrimer2" class="sheet-value">—</div>
+      </div>
+      <div class="cron-field">
+        <label>Cuota máxima (S/.):</label><div id="cronQmax2" class="sheet-value">—</div>
+      </div>
+    </div>
+
+    <div class="cron-blue-title">CRONOGRAMA DE PAGO PRELIMINAR “PRÉSTAMO POR CONVENIO”</div>
+
     <div class="cron-table-wrap">
       <table class="cron-table cron-base-table">
         <thead>
           <tr>
-            <th>Nro.<br>Cuota</th><th>Fecha de<br>Vencimiento</th><th>Saldo</th>
-            <th>Amortización</th><th>Interés</th><th>Comisiones o<br>gastos</th>
-            <th>Total<br>Cuota</th><th>Seguro<br>desgrav.</th><th>Total a<br>Pagar</th>
+            <th>Nro.<br>Cuota</th>
+            <th>Fecha de<br>Vencimiento</th>
+            <th>Saldo</th>
+            <th>Amortización</th>
+            <th>Interés</th>
+            <th>Comisiones o<br>gastos</th>
+            <th>Total<br>Cuota</th>
+            <th>Seguro<br>desgrav.</th>
+            <th>Total a<br>Pagar</th>
           </tr>
         </thead>
         <tbody id="cronBody"></tbody>
       </table>
     </div>
-    <div class="cron-base-notes">
+
+    <div class="cron-notes">
       <p>- NO SE INCLUYEN LOS GASTOS DIRECTAMENTE PAGADOS POR EL CLIENTE</p>
       <p>- EL MONTO DE AMORTIZACIÓN CON ESTE VALOR SE ORIGINA POR LA APLICACIÓN DEL CÁLCULO PARA LA OBTENCIÓN DE CUOTA CONSTANTE. NO AFECTA EL COSTO EFECTIVO ANUAL DEL CRÉDITO</p>
       <p>- EL PRIMER VENCIMIENTO PODRÁ SER DESDE EL DÍA 15 Y HASTA UN MÁXIMO DE 30 DÍAS DE ACUERDO A LA MODALIDAD ELEGIDA POR EL CLIENTE EN LA SOLICITUD DEL PRÉSTAMO, LA FECHA DE CUOTA CONSTANTE Y LA FECHA DE CORTE DEL CRONOGRAMA</p>
@@ -1144,7 +1400,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-    MOTOR V52 — replica la hoja "Cronograma" de la calculadora base.
+    MOTOR V53 — replica la hoja "Cronograma" de la calculadora base.
 
     TED = (1 + TEA)^(1/360) - 1
 
@@ -1366,6 +1622,39 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   };
 }
 
+function syncCronSheetFields(r, seguro){
+  if(!r)return;
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v??"—";};
+  set("cronConvenio",$("conv")?.value||r.Convenio||"—");
+  set("cronCargo",$("cargo")?.value||r.Cargo||"—");
+  set("cronEspecial",$("cond")?.value||r["Condicion especial"]||"—");
+  set("cronTasaConSeguro",r["Tasa Con Seguro"]||"—");
+  set("cronTasaSinSeguro",r["Tasa Sin Seguro"]||"—");
+  set("cronCuotasPermitidas",(r["Cuotas máximas (meses)"]||"—")+"");
+  set("cronGracia2",(r["Periodo de gracia"]||"0")+" meses");
+  set("cronSeguroNombre",seguro||"—");
+  const pctSeguro=insurancePctForOption(seguro);
+  set("cronSeguroPct2",pct(pctSeguro));
+  set("cronMonto2",money2(num("monto")));
+  set("cronTasa2",$("rate")?.textContent||"—");
+  set("cronDesembolso2",$("fechaDesembolso")?.value||"—");
+  set("cronCorte2",r["Fecha de corte "]??r["Fecha de corte"]??"—");
+  set("cronPago2",r["Fecha de pago"]??"—");
+  set("cronQmax2",$("qmax")?.textContent||"S/ 0.00");
+  set("cronPrimer2",$("cronPrimerVencimiento")?.textContent||"—");
+  set("cronTcea2",$("cronTcea")?.textContent||"—");
+  set("cronSeguroImporte2",$("cronSeguroImporte")?.textContent||"S/ 0.00");
+
+  const p=parseInt($("plazo")?.value||"0",10)||0;
+  const g=parseInt(r["Periodo de gracia"]||"0",10)||0;
+  set("cronDuracionTotal",(p+g)+" meses");
+
+  const req=$("cronSolicitud");
+  if(req && !req.value){
+    req.value=$("fechaDesembolso")?.value||"";
+  }
+}
+
 function parseInputDate(value){
   if(!value)return null;
   const m=String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -1502,10 +1791,20 @@ function calc(){
   const rci=parsePct(r["RCI boleta\n(Descuento máximo)"]);
   const provision=parseMoney(r["Provisión"]);
   const cuotaMaxima=Math.max(0,baseRCI*rci-facult-provision);
-  const cron=tea&&monto&&plazo ? renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso) : null;
-  if(cron) window.mcaLastCron=cron;
-  else if(!(tea&&monto&&plazo)) window.mcaLastCron=null;
+  let cron=null;
+  if(tea&&monto&&plazo){
+    try{
+      cron=renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso);
+      if(cron) window.mcaLastCron=cron;
+    }catch(err){
+      console.error("MCA: error en cronograma",err);
+      cron=null;
+    }
+  }else{
+    window.mcaLastCron=null;
+  }
   const cuota=(cron?.totalFirst ?? window.mcaLastCron?.totalFirst ?? 0);
+  setMoney("cuota",cuota);
   const deudas=totalOtherBankQuotas();
   const globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley-facult);
   const limite=edad>60?parsePct(r["Endeudamiento máximo \n(+ 60 años)"]):parsePct(r["Endeudamiento máximo \n(- 60 años)"]);
@@ -1531,6 +1830,7 @@ function calc(){
   setMoney("neto",Math.max(0,fi+va+nc+ad-ley-facult));
   if($("rate"))$("rate").textContent=tea?pct(tea):"—";if($("end"))$("end").textContent=pct(end);
   setMoney("fp",fi);setMoney("vp",va);setMoney("ncp",nc);setMoney("adp",ad);setMoney("lp",ley);setMoney("fap",facult);
+  syncCronSheetFields(r,seguro);
   if($("params"))$("params").innerHTML=[
     ["Buró permitido",r["Buró"]||"—"],["Edad máxima",maxAge+" años"],["RCI boleta",pct(rci)],
     ["Conversión ingreso variable",pct(variablePct)],["Provisión automática",money(provision)],
@@ -1542,7 +1842,10 @@ function calc(){
   $("gen").value=r["Consideraciones generales"]||"";$("esp").value=r["Condiciones Específicas"]||"";
   $("detail").innerHTML="<b>Ingreso fijo promedio:</b> "+money(fi)+"<br><b>Ingreso variable promedio:</b> "+money(va)+"<br><b>Conversión ingreso variable:</b> "+pct(variablePct)+"<br><b>Ingreso variable convertido:</b> "+money(variableConvertido)+"<br><b>Descuento de ley promedio:</b> "+money(ley)+"<br><b>Facultativos promedio:</b> "+money(facult)+"<br><b>Provisión automática:</b> "+money(provision)+"<br><b>Cuota máxima disponible:</b> "+money(cuotaMaxima);
   $("alerts").innerHTML=alerts.map(x=>'<div class="alert">⚠ '+esc(x)+'</div>').join("");
-  $("status").className="status "+(alerts.length?"bad":"ok");$("status").textContent=alerts.length?"✕ NO CALIFICA":"✓ CALIFICA";
+  if($("status")){
+    $("status").className="status "+(alerts.length?"bad":"ok");
+    $("status").textContent=alerts.length?"✕ NO CALIFICA":"✓ CALIFICA";
+  }
 }
 function init(){
  try{
@@ -1695,6 +1998,7 @@ window.addEventListener("load",()=>setTimeout(actualizarPlazoMaximo,100));
       try{ calc(); }catch(e){ console.warn("MCA: error al actualizar cronograma",e); }
     }
     if(!cronView||!mainView)return;
+    syncCronSheetFields(current(), $("seguro")?.value||"");
     mainView.style.display="none";
     cronView.classList.remove("cron-view-hidden");
     window.scrollTo({top:0,behavior:"smooth"});
@@ -1720,5 +2024,31 @@ window.addEventListener("load",()=>setTimeout(actualizarPlazoMaximo,100));
   // Keep the view consistent if the page is refreshed.
   window.mcaMostrarCronograma=mostrarCronograma;
   window.mcaVolverCalculadora=volverCalculadora;
+})();
+
+(function(){
+  const btn=document.getElementById("printCronogramaBtn");
+  const solicitud=document.getElementById("cronSolicitud");
+  const cliente=document.getElementById("cronCliente");
+  const dni=document.getElementById("cronDni");
+  if(btn)btn.addEventListener("click",function(){
+    window.print();
+  });
+  // If client/DNI are later entered here, keep them in the current session.
+  [cliente,dni,solicitud].forEach(el=>{
+    if(el)el.addEventListener("input",()=>{
+      try{
+        sessionStorage.setItem("mca_"+el.id,el.value);
+      }catch(e){}
+    });
+  });
+  [cliente,dni,solicitud].forEach(el=>{
+    if(el){
+      try{
+        const v=sessionStorage.getItem("mca_"+el.id);
+        if(v)el.value=v;
+      }catch(e){}
+    }
+  });
 })();
 </script>
