@@ -273,7 +273,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 </style>
 
 <style id="mca-v44-responsive">
-/* V46: el cronograma se calcula internamente; su detalle queda oculto. */
+/* V47: el cronograma se calcula internamente; su detalle queda oculto. */
 @media (max-width: 900px){
   body{overflow-x:hidden}
   .container,.page,.main-container{width:100%!important;max-width:100%!important}
@@ -383,7 +383,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 
 <div class="result-box">
   <span>PLAZO MÁXIMO</span>
-  <strong id="plazoMaximoResultado">—</strong><small id="plazoMaximoHint">Calculado según edad máxima del convenio</small>
+  <strong id="plazoMaximoResultado">—</strong><small id="plazoMaximoHint">Edad máxima + límite de cuotas del convenio</small>
 </div>
 <div id="status" class="status neutral">Selecciona convenio, cargo y condición</div><div id="alerts"></div>
 esultado calculado automáticamente según RCI, facultativos y provisión del convenio.</small></div>
@@ -905,7 +905,7 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   }
 
   /*
-   MODELO V46 — réplica del cronograma mostrado por el usuario.
+   MODELO V47 — réplica del cronograma mostrado por el usuario.
 
    1. Fecha de desembolso + corte + vencimiento determinan el primer periodo
       de gracia.
@@ -1138,6 +1138,8 @@ function actualizarPlazoMaximo(){
   }
 
   const edadMax=parseNumLoose(
+    r?.["Edad máxima al finalizar el crédito (Años)"] ??
+    r?.["Edad máxima al finalizar el crédito (años)"] ??
     r?.["Edad máxima"] ??
     r?.["Edad maxima"] ??
     r?.["Edad Máxima"] ??
@@ -1145,11 +1147,15 @@ function actualizarPlazoMaximo(){
     r?.["Edad Maxima"]
   );
 
-  const max=calcularPlazoMaximo(
+  let max=calcularPlazoMaximo(
     dob.value,
     desemb?.value,
     edadMax
   );
+
+  // The convention's maximum number of installments is an additional ceiling.
+  const cuotasMax=parseNumLoose(r?.["Cuotas máximas (meses)"]);
+  if(max!==null && cuotasMax>0) max=Math.min(max,cuotasMax);
 
   if(max===null){
     out.textContent="—";

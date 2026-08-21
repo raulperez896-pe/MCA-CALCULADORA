@@ -1,11 +1,9 @@
-# MCA CALCULADORA V46
+# MCA CALCULADORA V47
 
-Corrección del plazo máximo:
-- Usa los IDs reales de la calculadora: conv, cargo y cond.
-- Usa el perfil exacto devuelto por current().
-- Toma Edad máxima del convenio/perfil seleccionado.
-- Fecha límite = un mes antes de cumplir la edad máxima.
-- Plazo máximo = meses completos desde fecha de desembolso hasta esa fecha límite.
-- Se muestra en Resultado de la simulación.
-- Si el cliente ya supera esa fecha límite, muestra NO OTORGABLE.
-- La edad utilizada para las validaciones se calcula desde fecha de nacimiento y fecha de desembolso.
+Corrección definitiva del plazo máximo:
+- Usa la columna real de la base: `Edad máxima al finalizar el crédito (Años)`.
+- Calcula el último vencimiento permitido un mes antes del cumpleaños de la edad máxima.
+- Convierte el periodo desde la fecha de desembolso a meses completos.
+- Aplica además `Cuotas máximas (meses)` del convenio como límite superior.
+- Actualiza al cambiar fecha de nacimiento, fecha de desembolso, convenio, cargo o condición.
+- La cuota y el motor de cronograma se mantienen sin cambios.
