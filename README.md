@@ -1,32 +1,13 @@
-# MCA CALCULADORA V24
+# MCA CALCULADORA V27
 
-## Lógica corregida de boletas
+Se agregó una tabla dinámica de deudas de otros bancos basada en la hoja BANCOS de `CUADRO DE COMPRA DE DEUDA 2.xlsx`.
 
-### Caso 1: solo Boleta 1
-Si el usuario llena únicamente Boleta 1, la simulación utiliza únicamente los valores de Boleta 1.
-No divide los valores entre 3 ni considera Boleta 2/3 vacías como ceros.
+- Entidades cargadas: 102
+- Entidad: lista desplegable.
+- Tipo: PLD, CONVENIO, VEHICULAR, HIPOTECARIO, TARJETA DE CREDITO.
+- Monto deuda / línea: informativo.
+- Cuota mensual: afecta el endeudamiento.
+- Se pueden agregar múltiples deudas.
+- No se aplica ningún porcentaje sobre la línea utilizada/no utilizada.
 
-### Caso 2: Boleta 2
-Cuando se ingresa el Ingreso Variable de Boleta 2, se copian automáticamente desde Boleta 1:
-- Ingreso Fijo
-- No constante
-- Descuento de Ley
-- Facultativo
-
-El Ingreso Variable de Boleta 2 queda con el valor ingresado por el usuario.
-
-### Caso 3: Boleta 3
-Cuando se ingresa el Ingreso Variable de Boleta 3, se copian automáticamente desde Boleta 1:
-- Ingreso Fijo
-- No constante
-- Descuento de Ley
-- Facultativo
-
-El Ingreso Variable de Boleta 3 queda con el valor ingresado por el usuario.
-
-### Promedios
-- Solo B1 llena → promedio = B1.
-- B1 + B2 → promedio = (B1+B2)/2.
-- B1 + B2 + B3 → promedio = (B1+B2+B3)/3.
-
-La réplica se realiza mediante delegación de eventos para que funcione aunque la interfaz actualice/re-renderice los campos.
+Se mantienen las demás funciones de la calculadora.

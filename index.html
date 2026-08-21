@@ -64,7 +64,17 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
   }
 }
 </style>
-</head>
+<style id="debt-v27">
+.full-width{grid-column:1/-1}
+.debt-table-wrap{overflow-x:auto;border:1px solid #d8e1ec;border-radius:10px}
+.debt-table{width:100%;border-collapse:collapse;min-width:850px}
+.debt-table th{font-size:10px;text-transform:uppercase;letter-spacing:.2px;text-align:left;background:#f3f7fb;padding:9px;color:#27415f}
+.debt-table td{padding:7px;border-top:1px solid #e5ebf2;vertical-align:middle}
+.debt-table select,.debt-table input{width:100%;box-sizing:border-box;padding:9px;border:1px solid #cbd8e6;border-radius:7px;background:#fff}
+.debt-remove{border:1px solid #d95c5c;background:#fff;color:#b42318;border-radius:7px;padding:8px 10px;cursor:pointer}
+.add-debt-btn{margin-top:9px;border:0;border-radius:8px;padding:9px 14px;background:#062b55;color:#fff;font-weight:700;cursor:pointer}
+@media(max-width:900px){.debt-table{min-width:780px}}
+</style></head>
 <body>
 <header><div class="head">
 <div class="brand"><div class="logo-zone mca-zone"><img src="logo-mca.png" alt="Master Center Américas"></div><div><div class="title"><img src="logo-calculadora.png" alt="Master Calculadora" class="calculator-logo"></div><div class="sub">Calculadora de Créditos por Convenio</div></div></div>
@@ -126,14 +136,23 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 
 <div class="card"><h2>4. Deudas y obligaciones mensuales</h2>
 <div class="grid2">
-<div><label>Cuota Consumo BBVA</label><input id="dbcons" type="number" value="0" min="0"></div>
-<div><label>Cuota Vehicular BBVA</label><input id="dbveh" type="number" value="0" min="0"></div>
-<div><label>Cuota Hipotecaria BBVA</label><input id="dbhip" type="number" value="0" min="0"></div>
-<div><label>Cuota Tarjeta BBVA</label><input id="dbtc" type="number" value="0" min="0"></div>
-<div><label>Cuotas otros bancos</label><input id="dob" type="number" value="0" min="0"></div>
-<div><label>Línea TC utilizada</label><input id="lineaU" type="number" value="0" min="0"></div>
-<div><label>Línea TC no utilizada</label><input id="lineaN" type="number" value="0" min="0"></div>
-<div><label>Otros descuentos / obligaciones</label><input id="otros" type="number" value="0" min="0"></div>
+<div><label>Cuota Consumo BBVA</label><input id="dbcons" type="number" value="" min="0"></div>
+<div><label>Cuota Vehicular BBVA</label><input id="dbveh" type="number" value="" min="0"></div>
+<div><label>Cuota Hipotecaria BBVA</label><input id="dbhip" type="number" value="" min="0"></div>
+<div><label>Cuota Tarjeta BBVA</label><input id="dbtc" type="number" value="" min="0"></div>
+
+<div class="full-width debt-section">
+<label style="margin-bottom:8px;display:block">Deudas / obligaciones de otros bancos</label>
+<div class="debt-table-wrap">
+<table class="debt-table">
+<thead><tr><th>Entidad</th><th>Tipo de producto</th><th>Monto deuda / línea (S/.)</th><th>Cuota mensual (S/.)</th><th></th></tr></thead>
+<tbody id="otherDebtsBody"></tbody>
+</table>
+</div>
+<button type="button" id="addDebtBtn" class="add-debt-btn">+ Agregar deuda</button>
+</div>
+
+<div><label>Otros descuentos / obligaciones</label><input id="otros" type="number" value="" min="0"></div>
 </div></div>
 </section>
 
@@ -143,7 +162,7 @@ footer{max-width:1380px;margin:auto;padding:0 15px 25px;color:var(--muted);font-
 <div class="metric"><div class="k">Tasa aplicada</div><div class="v" id="rate">—</div></div>
 <div class="metric"><div class="k">Cuota nueva</div><div class="v" id="cuota">S/ 0.00</div></div>
 <div class="metric"><div class="k">Ingreso neto promedio</div><div class="v" id="neto">S/ 0.00</div></div>
-<div class="metric"><div class="k">Saco de liquidez</div><div class="v" id="qmax">S/ 0.00</div></div>
+<div class="metric"><div class="k">Cuota máxima</div><div class="v" id="qmax">S/ 0.00</div></div>
 <div class="metric"><div class="k">Endeudamiento final</div><div class="v" id="end">0.00%</div></div>
 </div>
 <div id="status" class="status neutral">Selecciona convenio, cargo y condición</div><div id="alerts"></div>
@@ -342,6 +361,149 @@ function resetResult(){
   $("anti").textContent="Selecciona un perfil.";
   calculateFinancialTable();
 }
+
+const BANK_OPTIONS=`<option value="ACCESO CREDITO VEHICULAR">ACCESO CREDITO VEHICULAR</option>
+<option value="ASOCIACION MUTUALISTA DE EMPLEADOS CIVILES FAP - AMECFA">ASOCIACION MUTUALISTA DE EMPLEADOS CIVILES FAP - AMECFA</option>
+<option value="ASOCIACION MUTUALISTA DE TÉCNICOS Y SUBOFICIALES DE LA FUERZA AEREA DEL PERU">ASOCIACION MUTUALISTA DE TÉCNICOS Y SUBOFICIALES DE LA FUERZA AEREA DEL PERU</option>
+<option value="AUXILIO COOPERATIVO MILITAR DE RETIRO">AUXILIO COOPERATIVO MILITAR DE RETIRO</option>
+<option value="BANCO AZTECA/ ALFIN BANCO">BANCO AZTECA/ ALFIN BANCO</option>
+<option value="BANCO CENCOSUD">BANCO CENCOSUD</option>
+<option value="BANCO DE COMERCIO">BANCO DE COMERCIO</option>
+<option value="BANCO DE CREDITO DEL PERU - BCP">BANCO DE CREDITO DEL PERU - BCP</option>
+<option value="BANCO DE LA NACION">BANCO DE LA NACION</option>
+<option value="BANCO FALABELLA">BANCO FALABELLA</option>
+<option value="BANCO GNB">BANCO GNB</option>
+<option value="BANCO INTERAMERICANO DE FINANZAS - BANBIF">BANCO INTERAMERICANO DE FINANZAS - BANBIF</option>
+<option value="BANCO INTERBANK">BANCO INTERBANK</option>
+<option value="BANCO MIBANCO">BANCO MIBANCO</option>
+<option value="BANCO PICHINCHA">BANCO PICHINCHA</option>
+<option value="BANCO RIPLEY">BANCO RIPLEY</option>
+<option value="BANCO SCOTIABANK (2)">BANCO SCOTIABANK (2)</option>
+<option value="BBVA CONSUMER">BBVA CONSUMER</option>
+<option value="CAFAE DE LOS TRABAJADORES EMPLEADOS DE LA MUNICIPALIDAD METROPOLITANA DE LIMA">CAFAE DE LOS TRABAJADORES EMPLEADOS DE LA MUNICIPALIDAD METROPOLITANA DE LIMA</option>
+<option value="CAFAE - PODER JUDICIAL (3)">CAFAE - PODER JUDICIAL (3)</option>
+<option value="CAFAE - SENASA">CAFAE - SENASA</option>
+<option value="CAFAE - SUB CAFAE - HOSPITAL LOAYZA (3)">CAFAE - SUB CAFAE - HOSPITAL LOAYZA (3)</option>
+<option value="CAJA CENTRO">CAJA CENTRO</option>
+<option value="CAJA MAYNAS">CAJA MAYNAS</option>
+<option value="CAJA METROPOLITANA DE LIMA">CAJA METROPOLITANA DE LIMA</option>
+<option value="CAJA MUNICIPAL DE AHORRO Y CRÉDITO CUSCO S.A. - CMAC CUSCO">CAJA MUNICIPAL DE AHORRO Y CRÉDITO CUSCO S.A. - CMAC CUSCO</option>
+<option value="CAJA MUNICIPAL DE AHORRO Y CRÉDITO DE HUANCAYO S.A.- CAJA HUANCAYO">CAJA MUNICIPAL DE AHORRO Y CRÉDITO DE HUANCAYO S.A.- CAJA HUANCAYO</option>
+<option value="CAJA MUNICIPAL DE AHORRO Y CRÉDITO DE ICA S.A. - CMAC ICA">CAJA MUNICIPAL DE AHORRO Y CRÉDITO DE ICA S.A. - CMAC ICA</option>
+<option value="CAJA MUNICIPAL DE AHORRO Y CRÉDITO DE PIURA - CMAC PIURA">CAJA MUNICIPAL DE AHORRO Y CRÉDITO DE PIURA - CMAC PIURA</option>
+<option value="CAJA MUNICIPAL DE AHORRO Y CRÉDITO DE TRUJILLO S.A. - CMAC TRUJILLO">CAJA MUNICIPAL DE AHORRO Y CRÉDITO DE TRUJILLO S.A. - CMAC TRUJILLO</option>
+<option value="CAJA MUNICIPAL DE AHORRO Y CRÉDITO TACNA - CMAC TACNA">CAJA MUNICIPAL DE AHORRO Y CRÉDITO TACNA - CMAC TACNA</option>
+<option value="CAJA MUNICIPAL DE AREQUIPA">CAJA MUNICIPAL DE AREQUIPA</option>
+<option value="CAJA PAITA">CAJA PAITA</option>
+<option value="CAJA RURAL DE AHORRO Y CRÉDITO LOS ANDES">CAJA RURAL DE AHORRO Y CRÉDITO LOS ANDES</option>
+<option value="COMPARTAMOS FINANCIERA">COMPARTAMOS FINANCIERA</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO CELENDIN">COOPERATIVA DE AHORRO Y CREDITO CELENDIN</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO CREDICOOP LUZ Y FUERZA LTDA - CREDICOOP">COOPERATIVA DE AHORRO Y CRÉDITO CREDICOOP LUZ Y FUERZA LTDA - CREDICOOP</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO CRNL. FRANCISCO BOLOGNESI">COOPERATIVA DE AHORRO Y CRÉDITO CRNL. FRANCISCO BOLOGNESI</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO DEL HOSPITAL DANIEL A. CARRION LTDA. - COOPAC DAC">COOPERATIVA DE AHORRO Y CREDITO DEL HOSPITAL DANIEL A. CARRION LTDA. - COOPAC DAC</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO EL DORADO">COOPERATIVA DE AHORRO Y CRÉDITO EL DORADO</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO EL TUMI">COOPERATIVA DE AHORRO Y CREDITO EL TUMI</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO EMPHOST">COOPERATIVA DE AHORRO Y CRÉDITO EMPHOST</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO FINANTEL">COOPERATIVA DE AHORRO Y CRÉDITO FINANTEL</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO INTERFINCO">COOPERATIVA DE AHORRO Y CRÉDITO INTERFINCO</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO LA PORTUARIA">COOPERATIVA DE AHORRO Y CREDITO LA PORTUARIA</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO LA REHABILITADORA">COOPERATIVA DE AHORRO Y CRÉDITO LA REHABILITADORA</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO LEON XIII">COOPERATIVA DE AHORRO Y CRÉDITO LEON XIII</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO NUESTRA SEÑORA DEL ROSARIO">COOPERATIVA DE AHORRO Y CREDITO NUESTRA SEÑORA DEL ROSARIO</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO PETROPERÚ LTDA">COOPERATIVA DE AHORRO Y CREDITO PETROPERÚ LTDA</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO PROMOCION TAHUANTINSUYO 1946">COOPERATIVA DE AHORRO Y CREDITO PROMOCION TAHUANTINSUYO 1946</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO SAN JOSE LTDA 178">COOPERATIVA DE AHORRO Y CREDITO SAN JOSE LTDA 178</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO SAN MARTIN DE PORRES">COOPERATIVA DE AHORRO Y CREDITO SAN MARTIN DE PORRES</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO SAN MIGUEL">COOPERATIVA DE AHORRO Y CRÉDITO SAN MIGUEL</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO SANTO CRISTO DE BAGAZAN">COOPERATIVA DE AHORRO Y CREDITO SANTO CRISTO DE BAGAZAN</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO SANTO DOMINGO DE GUZMÁN">COOPERATIVA DE AHORRO Y CRÉDITO SANTO DOMINGO DE GUZMÁN</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO SERFINCO">COOPERATIVA DE AHORRO Y CREDITO SERFINCO</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO TODOS LOS SANTOS DE CHOTA LTDA 560">COOPERATIVA DE AHORRO Y CREDITO TODOS LOS SANTOS DE CHOTA LTDA 560</option>
+<option value="COOPERATIVA DE SERVICIOS MÚLTIPLES ALAS PERUANAS">COOPERATIVA DE SERVICIOS MÚLTIPLES ALAS PERUANAS</option>
+<option value="COOPERATIVA DE SERVICIOS MÚLTIPLES DE LOS TRABAJADORES DEL INSTITUTO PERUANO DE SEGURIDAD SOCIAL SAN JORGE LTDA.">COOPERATIVA DE SERVICIOS MÚLTIPLES DE LOS TRABAJADORES DEL INSTITUTO PERUANO DE SEGURIDAD SOCIAL SAN JORGE LTDA.</option>
+<option value="COOPERATIVA DE SERVICIOS MULTIPLES ESSALUD DEL CENTRO LTDA / COOP 3">COOPERATIVA DE SERVICIOS MULTIPLES ESSALUD DEL CENTRO LTDA / COOP 3</option>
+<option value="COOPERATIVA DE SERVICIOS MULTIPLES MANUEL POLO JIMENEZ - COOPOLO">COOPERATIVA DE SERVICIOS MULTIPLES MANUEL POLO JIMENEZ - COOPOLO</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO SAN HILARIÓN">COOPERATIVA DE AHORRO Y CRÉDITO SAN HILARIÓN</option>
+<option value="COOP DE AHORRO Y CREDITO TOCACHE LTDA 35">COOP DE AHORRO Y CREDITO TOCACHE LTDA 35</option>
+<option value="SEGURO DE CESANTIA DE LOS DOCENTES UNAP (SECEDO - UNAP)">SEGURO DE CESANTIA DE LOS DOCENTES UNAP (SECEDO - UNAP)</option>
+<option value="DERRAMA MAGISTERIAL">DERRAMA MAGISTERIAL</option>
+<option value="DINERS CLUB INTERNATIONAL">DINERS CLUB INTERNATIONAL</option>
+<option value="EDPYME GMG SERVICIOS PERU S.A (GRUPO MONGE)">EDPYME GMG SERVICIOS PERU S.A (GRUPO MONGE)</option>
+<option value="FINANCIERA CONFIANZA">FINANCIERA CONFIANZA</option>
+<option value="SANTANDER CONSUMER BANK S.A.">SANTANDER CONSUMER BANK S.A.</option>
+<option value="FINANCIERA CREDINKA">FINANCIERA CREDINKA</option>
+<option value="FINANCIERA EFECTIVA">FINANCIERA EFECTIVA</option>
+<option value="FINANCIERA PROEMPRESA">FINANCIERA PROEMPRESA</option>
+<option value="FINANCIERA QAPAQ">FINANCIERA QAPAQ</option>
+<option value="FONDO DE AYUDA MUTUA DE LAS ENFERMERAS (OS) DEL SEGURO SOCIAL DE SALUD - FAMENSSALUD">FONDO DE AYUDA MUTUA DE LAS ENFERMERAS (OS) DEL SEGURO SOCIAL DE SALUD - FAMENSSALUD</option>
+<option value="FONDO DE SEGURO DE RETIRO Y CESACION DEL EJERCITO - FSRYC / DFSCE">FONDO DE SEGURO DE RETIRO Y CESACION DEL EJERCITO - FSRYC / DFSCE</option>
+<option value="INVERSIONES LA CRUZ">INVERSIONES LA CRUZ</option>
+<option value="SANTANDER CONSUMER PERÚ">SANTANDER CONSUMER PERÚ</option>
+<option value="SEDAPAL - PRÉSTAMO ESPECIAL">SEDAPAL - PRÉSTAMO ESPECIAL</option>
+<option value="SEDAPAL - PRÉSTAMO VACACIONAL">SEDAPAL - PRÉSTAMO VACACIONAL</option>
+<option value="TELEFÓNICA - PRÉSTAMO INTERNO">TELEFÓNICA - PRÉSTAMO INTERNO</option>
+<option value="COOPERATIVA DE AHORRO Y CRÉDITO DEL CENTRO">COOPERATIVA DE AHORRO Y CRÉDITO DEL CENTRO</option>
+<option value="SUB CAFAE SE AREQUIPA">SUB CAFAE SE AREQUIPA</option>
+<option value="SUB CAFAE SE CHANCHAMAYO">SUB CAFAE SE CHANCHAMAYO</option>
+<option value="SUB CAFAE UGEL - HUANCAYO">SUB CAFAE UGEL - HUANCAYO</option>
+<option value="Sub Cafae Ica - Sub Regional de Educación">Sub Cafae Ica - Sub Regional de Educación</option>
+<option value="COOP DE AHORRO Y CREDITO SANTA CATALINA DE MOQUEGUA">COOP DE AHORRO Y CREDITO SANTA CATALINA DE MOQUEGUA</option>
+<option value="CAFAE - SAN MARCOS DOCENTES">CAFAE - SAN MARCOS DOCENTES</option>
+<option value="CAFAE - SAN MARCOS ADMINISTRATIVOS">CAFAE - SAN MARCOS ADMINISTRATIVOS</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO DE LOS TRABAJADORES DEL SECTOR SALUD LTDA.">COOPERATIVA DE AHORRO Y CREDITO DE LOS TRABAJADORES DEL SECTOR SALUD LTDA.</option>
+<option value="SUB COMITÉ DE ADMINISTRACION DE FONDOS Y ASISTENCIA - ESTIMULO UGEL TACNA">SUB COMITÉ DE ADMINISTRACION DE FONDOS Y ASISTENCIA - ESTIMULO UGEL TACNA</option>
+<option value="COOPERATIVA DE AHORRO Y CREDITO SAN CRISTOBAL DE HUAMANGA">COOPERATIVA DE AHORRO Y CREDITO SAN CRISTOBAL DE HUAMANGA</option>
+<option value="ENAZUL FINTECH (PRÉSTAMO FELIZ)">ENAZUL FINTECH (PRÉSTAMO FELIZ)</option>
+<option value="SUB CAFAE SE IQUITOS MAYNAS LORETO">SUB CAFAE SE IQUITOS MAYNAS LORETO</option>
+<option value="Scotiabank - Cafae SE">Scotiabank - Cafae SE</option>
+<option value="Cafae SE - Prèstamo Interno">Cafae SE - Prèstamo Interno</option>
+<option value="Cooperativa de servicios múltiples San Benito de Palermo">Cooperativa de servicios múltiples San Benito de Palermo</option>
+<option value="Cooperativa de servicios Especiales">Cooperativa de servicios Especiales</option>
+<option value="Grupo - PROEDUCA">Grupo - PROEDUCA</option>
+<option value="SUB CAFAE DE TRABAJADORES DE LA UGEL NO.01 SJM">SUB CAFAE DE TRABAJADORES DE LA UGEL NO.01 SJM</option>
+<option value="BANCO PICHINCHA - DINERS">BANCO PICHINCHA - DINERS</option>
+<option value="CITIBANK">CITIBANK</option>
+<option value="SIP - INFINANCE XP S.A.">SIP - INFINANCE XP S.A.</option>`;
+const DEBT_TYPES=`<option value="PLD">PLD</option>
+<option value="CONVENIO">CONVENIO</option>
+<option value="VEHICULAR">VEHICULAR</option>
+<option value="HIPOTECARIO">HIPOTECARIO</option>
+<option value="TARJETA DE CREDITO">TARJETA DE CREDITO</option>`;
+let debtRowId=0;
+
+function addOtherDebtRow(){
+  const body=$("otherDebtsBody");
+  if(!body)return;
+  debtRowId++;
+  const tr=document.createElement("tr");
+  tr.dataset.rowId=String(debtRowId);
+  tr.innerHTML=`<td><select class="debt-bank"><option value="">Seleccione banco</option>${BANK_OPTIONS}</select></td>
+    <td><select class="debt-type"><option value="">Seleccione tipo</option>${DEBT_TYPES}</select></td>
+    <td><input class="debt-amount" type="number" min="0" step="0.01" placeholder="0.00"></td>
+    <td><input class="debt-quota" type="number" min="0" step="0.01" placeholder="0.00"></td>
+    <td><button type="button" class="debt-remove" title="Eliminar">✕</button></td>`;
+  body.appendChild(tr);
+  tr.querySelectorAll("input,select").forEach(el=>{
+    el.addEventListener("input",calc);
+    el.addEventListener("change",calc);
+  });
+  tr.querySelector(".debt-remove").addEventListener("click",()=>{tr.remove();calc();});
+}
+
+function totalOtherBankQuotas(){
+  return [...document.querySelectorAll(".debt-quota")].reduce((s,el)=>s+numElement(el),0);
+}
+
+function numElement(el){
+  if(!el)return 0;
+  let v=String(el.value??"").trim().replace(/\s/g,"");
+  if(!v)return 0;
+  if(v.includes(",")&&v.includes("."))v=v.replace(/\./g,"").replace(",",".");
+  else if(v.includes(","))v=v.replace(",",".");
+  const n=parseFloat(v);
+  return Number.isFinite(n)?Math.max(0,n):0;
+}
+
 function calc(){
   calculateFinancialTable();
   const r=current();
@@ -354,25 +516,26 @@ function calc(){
   const baseRCI=Math.max(0,fi+variableConvertido-ley);
   const rci=parsePct(r["RCI boleta\n(Descuento máximo)"]);
   const provision=parseMoney(r["Provisión"]);
-  const sacoLiquidez=Math.max(0,baseRCI*rci-facult-provision);
+  const cuotaMaxima=Math.max(0,baseRCI*rci-facult-provision);
   const cuota=tea?monto*factor(tea,plazo):0;
-  const deudas=num("dbcons")+num("dbveh")+num("dbhip")+num("dbtc")+num("dob")+num("lineaU")+num("otros");
-  const tcNoUtil=num("lineaN")*0.5/36;
+  const deudas=
+    num("dbcons")+num("dbveh")+num("dbhip")+num("dbtc")+
+    totalOtherBankQuotas()+num("otros");
   const globalBase=Math.max(0,fi+variableConvertido+nc+ad-ley);
   const limite=edad>60?parsePct(r["Endeudamiento máximo \n(+ 60 años)"]):parsePct(r["Endeudamiento máximo \n(- 60 años)"]);
-  const end=globalBase?(deudas+tcNoUtil+cuota)/globalBase:0;
+  const end=globalBase?(deudas+cuota)/globalBase:0;
   const maxAge=Number(r["Edad máxima al finalizar el crédito (Años)"])||999,ageEnd=edad+plazo/12,alerts=[];
   if(!b)alerts.push("Selecciona el buró para aplicar la tasa correcta.");
   else if(!allowed(r["Buró"],b))alerts.push("El buró "+b+" no está permitido para este perfil ("+(r["Buró"]||"no informado")+")");
   if(!seguro)alerts.push("Selecciona una de las 5 opciones de seguro.");
   if(!tea)alerts.push("No se encontró una tasa para la combinación Buró + seguro seleccionada.");
   if(edad&&plazo&&ageEnd>maxAge)alerts.push("El plazo excede la edad máxima permitida para este convenio.");
-  if(monto&&cuota>sacoLiquidez)alerts.push("La cuota nueva supera el saco de liquidez disponible.");
+  if(monto&&cuota>cuotaMaxima)alerts.push("La cuota nueva supera el cuota máxima disponible.");
   if(globalBase&&end>limite)alerts.push("El endeudamiento global supera el límite permitido.");
-  const availableEnd=Math.max(0,limite*globalBase-deudas-tcNoUtil);
-  const maxPay=Math.max(0,Math.min(sacoLiquidez,availableEnd));
+  const availableEnd=Math.max(0,limite*globalBase-obligacionesFinales+cuota);
+  const maxPay=Math.max(0,Math.min(cuotaMaxima,availableEnd));
   const suggested=tea&&plazo?maxPay/factor(tea,plazo):0;
-  setMoney("cuota",cuota);setMoney("qmax",sacoLiquidez);setMoney("sug",suggested); setMoney("neto",Math.max(0,fi+va+nc+ad-ley-facult));
+  setMoney("cuota",cuota);setMoney("qmax",cuotaMaxima);setMoney("sug",suggested); setMoney("neto",Math.max(0,fi+va+nc+ad-ley-facult));
   if($("rate"))$("rate").textContent=tea?pct(tea):"—";if($("end"))$("end").textContent=pct(end);
   setMoney("fp",fi);setMoney("vp",va);setMoney("ncp",nc);setMoney("adp",ad);setMoney("lp",ley);setMoney("fap",facult);
   if($("params"))$("params").innerHTML=[
@@ -383,7 +546,7 @@ function calc(){
   ].map(x=>'<div class="param"><b>'+esc(x[0])+'</b><span>'+esc(x[1])+'</span></div>').join("");
   $("anti").innerHTML="<b>Antigüedad requerida:</b> "+esc(r["Antiguedad de servidor (Años)"]||"No especificada")+" años";
   $("gen").value=r["Consideraciones generales"]||"";$("esp").value=r["Condiciones Específicas"]||"";
-  $("detail").innerHTML="<b>Ingreso fijo promedio:</b> "+money(fi)+"<br><b>Ingreso variable promedio:</b> "+money(va)+"<br><b>Conversión ingreso variable:</b> "+pct(variablePct)+"<br><b>Ingreso variable convertido:</b> "+money(variableConvertido)+"<br><b>Descuento de ley promedio:</b> "+money(ley)+"<br><b>Facultativos promedio:</b> "+money(facult)+"<br><b>Provisión automática:</b> "+money(provision)+"<br><b>Saco de liquidez disponible:</b> "+money(sacoLiquidez);
+  $("detail").innerHTML="<b>Ingreso fijo promedio:</b> "+money(fi)+"<br><b>Ingreso variable promedio:</b> "+money(va)+"<br><b>Conversión ingreso variable:</b> "+pct(variablePct)+"<br><b>Ingreso variable convertido:</b> "+money(variableConvertido)+"<br><b>Descuento de ley promedio:</b> "+money(ley)+"<br><b>Facultativos promedio:</b> "+money(facult)+"<br><b>Provisión automática:</b> "+money(provision)+"<br><b>Cuota máxima disponible:</b> "+money(cuotaMaxima);
   $("alerts").innerHTML=alerts.map(x=>'<div class="alert">⚠ '+esc(x)+'</div>').join("");
   $("status").className="status "+(alerts.length?"bad":"ok");$("status").textContent=alerts.length?"✕ NO CALIFICA":"✓ CALIFICA";
 }
@@ -455,6 +618,9 @@ document.addEventListener("DOMContentLoaded",()=>{
       x.addEventListener("change",calc);
       x.addEventListener("keyup",calc);
     });
+    $("addDebtBtn").addEventListener("click",()=>{addOtherDebtRow();calc();});
+    addOtherDebtRow();
+
     installAutoReplicate();
 
     DATA=FALLBACK;
