@@ -2194,4 +2194,60 @@ window.addEventListener("load",()=>setTimeout(actualizarPlazoMaximo,100));
     }
   });
 })();
-</script>
+</script><style id="mca-v63-final-print">
+/* V63 - Ajuste final de distribución y salida de impresión A4 */
+#cronogramaView .cron-data-grid{
+  grid-template-columns:1.05fr 1.05fr .95fr 1.05fr!important;
+  grid-auto-rows:minmax(31px,auto)!important;
+  gap:5px 10px!important;
+}
+#cronogramaView .cron-field{min-height:31px!important}
+#cronogramaView .cron-field label{font-size:11px!important;margin:0 0 2px 2px!important;line-height:1.1!important}
+#cronogramaView .sheet-value,
+#cronogramaView .sheet-input{min-height:22px!important;padding:3px 6px!important;font-size:11px!important;line-height:1.15!important}
+#cronogramaView .multiline{min-height:40px!important}
+/* Posición definitiva: Fecha de solicitud queda debajo de Cuota máxima. */
+#cronogramaView .solicitud-field{grid-column:4!important;grid-row:9!important}
+#cronogramaView .qmax-field{grid-column:4!important;grid-row:8!important}
+#cronogramaView .desembolso-field{grid-column:1!important;grid-row:8!important}
+#cronogramaView .tcea-field{grid-column:2!important;grid-row:7!important}
+#cronogramaView .cron-blue-title{margin-top:6px!important;font-size:16px!important;padding:5px 8px!important}
+#cronogramaView .cron-base-table{font-size:9.5px!important;min-width:0!important}
+#cronogramaView .cron-base-table th{font-size:9.5px!important;padding:4px 3px!important}
+#cronogramaView .cron-base-table td{font-size:9.5px!important;padding:2.5px 4px!important}
+#cronogramaView .cron-notes{margin-top:18px!important;padding-bottom:0!important;min-height:0!important;font-size:9px!important;line-height:1.15!important}
+#cronogramaView .cron-notes p{margin:0 0 4px!important}
+#cronogramaView .cron-signature{margin:48px 0 0 12px!important;width:220px!important;font-size:10px!important}
+
+@page{size:A4 portrait;margin:7mm 6mm 7mm 6mm}
+@media print{
+  html,body{width:210mm!important;min-height:297mm!important;background:#fff!important}
+  body{margin:0!important;padding:0!important;overflow:visible!important}
+  body>*:not(#cronogramaView){display:none!important}
+  #cronogramaView{display:block!important;position:static!important;width:100%!important;margin:0!important;padding:0!important;background:#fff!important}
+  #cronogramaView .cron-sheet{
+    width:100%!important;max-width:none!important;margin:0!important;
+    border:1px solid #8f8f8f!important;border-radius:0!important;
+    padding:4mm 4mm 5mm!important;box-shadow:none!important;
+    page-break-inside:avoid!important;overflow:visible!important;
+  }
+  #cronogramaView .cron-sheet-toolbar{display:none!important}
+  #cronogramaView .cron-sheet-header{height:21px!important;margin-bottom:5px!important}
+  #cronogramaView .sheet-title{font-size:11px!important}
+  #cronogramaView .cron-data-grid{grid-auto-rows:minmax(24px,auto)!important;gap:3px 7px!important}
+  #cronogramaView .cron-field{min-height:24px!important}
+  #cronogramaView .cron-field label{font-size:8.5px!important;margin-bottom:1px!important}
+  #cronogramaView .sheet-value,#cronogramaView .sheet-input{min-height:18px!important;padding:2px 4px!important;font-size:8.5px!important}
+  #cronogramaView .multiline{min-height:31px!important}
+  #cronogramaView .cron-blue-title{font-size:11px!important;padding:3px 5px!important;margin-top:4px!important}
+  #cronogramaView .cron-table-wrap{overflow:visible!important;margin:0!important}
+  #cronogramaView .cron-base-table{width:100%!important;min-width:0!important;table-layout:fixed!important;font-size:7.3px!important}
+  #cronogramaView .cron-base-table th{font-size:7.2px!important;padding:2px 1px!important;line-height:1!important}
+  #cronogramaView .cron-base-table td{font-size:7.2px!important;padding:1.5px 2px!important;line-height:1.05!important}
+  #cronogramaView .cron-ellipsis-row td{height:8px!important;padding:0!important}
+  #cronogramaView .cron-notes{margin:8px 3px 0!important;font-size:7.2px!important;line-height:1.05!important}
+  #cronogramaView .cron-notes p{margin:0 0 2.5px!important}
+  #cronogramaView .cron-signature{margin:34px 0 0 5px!important;width:180px!important;font-size:8px!important}
+  #cronogramaView .cron-signature br{line-height:1!important}
+}
+</style>
