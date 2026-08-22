@@ -1,7 +1,8 @@
+<!-- VERSION V77: TCEA alineada a lógica de calculadora base -->
 <!doctype html>
 <html lang="es">
 <head>
-<meta name="mca-version" content="V72">
+<meta name="mca-version" content="V76">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MCA CALCULADORA | Master Center Américas</title>
@@ -2415,11 +2416,26 @@ function renderCronograma(r,monto,plazo,tea,seguro,fechaDesembolso){
   const firstAmort=firstTotalCuota-firstInterest;
   const firstSaldo=Math.max(0,capitalInicial-firstAmort);
 
-  // TCEA referencial: conversión de TEA a tasa mensual efectiva y
-  // adición del costo mensual del seguro desgravamen. No se anualiza
-  // multiplicando la tasa diaria por los días del plazo.
-  const tasaMensualNominal=tea/12;
-  const tcea=Math.pow(1+tasaMensualNominal+insuranceRate,12)-1;
+  // TCEA referencial: replica la lógica de la calculadora base.
+  // Se obtiene con RATE sobre el flujo del cronograma:
+  // nper = plazo + 1 (equivalente a duración total - gracia + 1),
+  // pago = total a pagar por cuota (incluye seguro),
+  // pv = capital inicial del cronograma (principal + interés capitalizado de gracia),
+  // y luego se anualiza: (1 + tasa_mensual)^12 - 1.
+  const tceaNper=Math.max(1,Math.round(plazo)+1);
+  const tceaPayment=cuotaConstante;
+  const tceaPV=capitalInicial;
+  function rateForTcea(nper,pmt,pv){
+    const f=(r)=> pv - pmt*(1-Math.pow(1+r,-nper))/r;
+    let lo=1e-12, hi=1;
+    for(let i=0;i<120;i++){
+      const mid=(lo+hi)/2;
+      if(f(mid)>0) lo=mid; else hi=mid;
+    }
+    return (lo+hi)/2;
+  }
+  const tceaMonthly=rateForTcea(tceaNper,tceaPayment,tceaPV);
+  const tcea=Math.pow(1+tceaMonthly,12)-1;
 
   // La V56 cambió los IDs visuales de la hoja. Escribimos en los
   // campos nuevos y, si existen, también en los IDs antiguos.
@@ -2575,7 +2591,7 @@ function syncCronSheetFields(r, seguro){
   set("cronEspecial",$("cond")?.value||r["Condicion especial"]||"—");
   set("cronTasaConSeguro",r["Tasa Con Seguro"]||"—");
   set("cronTasaSinSeguro",r["Tasa Sin Seguro"]||"—");
-  set("cronCuotasPermitidas",(r["Cuotas máximas (meses)"]||"—")+"");
+  set("cronCuotasPermitidas",(r["Cuotas máximas (meses)"]||"—")+" meses");
   set("cronGracia2",(r["Periodo de gracia"]||"0")+" meses");
   set("cronSeguroNombre",seguro||"—");
   const pctSeguro=insurancePctForOption(seguro);
