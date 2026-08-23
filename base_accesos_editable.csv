@@ -1,0 +1,4 @@
+﻿Usuario;Clave;Nombre;TipoUsuario;Cargo;Zona;Codigo;Estado
+RAULPEREZ;1234567;Raul Perez;GERENTE;Gerente Comercial;Gerencial Comercial;RP001;ACTIVO
+CAROL_ALVAREZ;1234567;Carol Alvarez;SUPERVISOR;Supervisora Puno;Puno;RP002;ACTIVO
+PAOLA_PEREZ;1234567;Paola Perez;SUPERVISOR;Supervisora Lima;Lima;RP003;ACTIVO
