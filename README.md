@@ -1,3 +1,5 @@
-MCA Calculadora V77
+MCA Calculadora V80
 
-Corrección focalizada: TCEA Referencial ahora replica la lógica de la calculadora base mediante RATE sobre el capital inicial del cronograma y el total a pagar por cuota, anualizado a 12 periodos. El resto de la lógica y diseño se mantiene desde V76.
+Actualización de la base de accesos para identificar automáticamente el tipo de usuario (PROMOTOR, SUPERVISOR, GERENTE o BACK OFFICE), nombre, cargo y zona en la tarjeta superior.
+
+La página lee `base_accesos_editable.csv`. Para modificar usuarios, edite el Excel de administración y luego exporte la hoja `Usuarios` como CSV UTF-8 reemplazando este archivo.
